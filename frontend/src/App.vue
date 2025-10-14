@@ -1,17 +1,10 @@
-<script setup>
-import { ref, onMounted } from 'vue'
-
-const message = ref('Loading...')
-
-onMounted(async () => {
-  const res = await fetch('http://localhost:8000/api/hello')
-  const data = await res.json()
-  message.value = data.message
-})
-</script>
-
+<!-- App.vue -->
 <template>
   <main class="text-center text-2xl p-6">
-    {{ message }}
+    <HelloMessage />
   </main>
 </template>
+
+<script setup>
+import HelloMessage from './components/HelloMessage.vue'
+</script>
