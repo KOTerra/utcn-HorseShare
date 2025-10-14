@@ -4,13 +4,17 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    platform: linux/amd64   # forces x64 build
+    platform: linux/amd64
     ports:
       - "5173:5173"
     environment:
       - NODE_ENV=development
     depends_on:
       - backend
+    volumes:
+      - ./frontend:/app        # 👈 Mount local frontend folder
+      - /app/node_modules      # 👈 Prevent overwriting node_modules
+
 
   backend:
     build:
