@@ -22,3 +22,7 @@ firebase_admin.initialize_app(cred)
 @app.get("/api/hello")
 async def hello():
     return {"message": "Hello from FastAPI!"}
+
+@app.get("/api/bye")
+async def hello():
+    return {"message": "Bye from FastAPI!"}
