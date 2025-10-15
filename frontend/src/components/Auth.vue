@@ -43,7 +43,7 @@ const loginWithGoogle = async () => {
         const location = await getUserLocationAsync(); // should return [lat, lng]
 
         await fetch("http://localhost:8000/api/users", {
-            method: "POST",
+            method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 uid: user.uid,

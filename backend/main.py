@@ -38,8 +38,8 @@ async def hello():
 async def bye():
     return {"message": "Bye from FastAPI!"}
 
-# POST route to save user
-@app.post("/api/users")
+# PUT endpoint to save user
+@app.put("/api/users")
 async def save_user(user: UserData):
     try:
         ref = db.reference(f"users/{user.uid}")
