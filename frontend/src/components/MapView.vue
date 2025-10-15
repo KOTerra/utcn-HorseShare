@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import horseIconUrl from '../assets/horseIcon.png'
+import carriageIconUrl from '../assets/horseCarriageIcon.png'
 
 const userMarker = ref(null)
 const locationError = ref(null)
@@ -17,9 +18,16 @@ const DEFAULT_ZOOM = 33
 const horseIcon = L.icon({
     iconUrl : horseIconUrl,
     iconSize: [30, 30],
-    iconAnchor: [19, 38],
-    popupAnchor: [0, -38]
+    iconAnchor: [15, 30],
+    popupAnchor: [0, -30]
 }) 
+
+const carriageIcon = L.icon({
+    iconUrl : carriageIconUrl,
+    iconSize : [30, 30],
+    iconAnchor : [15, 30], 
+    popupAnchor : [0, -30]
+})
 
 
 function initializeMap(lat, lon, zoom) {
