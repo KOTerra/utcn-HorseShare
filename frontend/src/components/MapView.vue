@@ -1,9 +1,11 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed , watch} from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import horseIconUrl from '../assets/horseIcon.png'
 import carriageIconUrl from '../assets/horseCarriageIcon.png'
+import { userStore } from "../stores/userStores.js"
+
 
 const userMarker = ref(null)
 const locationError = ref(null)
@@ -12,21 +14,25 @@ const DEFAULT_LAT = 46.77 //cluj napoca
 const DEFAULT_LON = 23.59
 const DEFAULT_ZOOM = 33
 
+const isLoggedIn = computed(() => userStore.loggedIn)
+const userEmail = computed(() => userStore.email)
+const userLocation = computed(() => userStore.location)
 
+let map = ref(null);
 
 //TEST - To move to backend
 const horseIcon = L.icon({
-    iconUrl : horseIconUrl,
-    iconSize: [30, 30],
-    iconAnchor: [15, 30],
-    popupAnchor: [0, -30]
-}) 
+  iconUrl: horseIconUrl,
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
+  popupAnchor: [0, -30]
+})
 
 const carriageIcon = L.icon({
-    iconUrl : carriageIconUrl,
-    iconSize : [30, 30],
-    iconAnchor : [15, 30], 
-    popupAnchor : [0, -30]
+  iconUrl: carriageIconUrl,
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
+  popupAnchor: [0, -30]
 })
 
 
@@ -52,40 +58,10 @@ function updateMapWithLocation(map, lat, lon) {
   userMarker.value.setLatLng(newLatLng)
   userMarker.value.setPopupContent('Hello from Horse Share 🐴');
   userMarker.value.openPopup()
-
-  //userMarker.value = L.marker([lat, lon]).addTo(map).bindPopup('Hello from Horse Share 🐴').openPopup()
 }
 
-function getUsersLocation(map) {
-  if ('geolocation' in navigator) {
-    navigator.geolocation.getCurrentPosition(
-      //Success callback
-      (position) => {
-        const { latitude, longitude } = position.coords
-        updateMapWithLocation(map, latitude, longitude)
-        locationError.value = null
 
-        //Generate the horses
-        //TEST : MOVE TO BACKEND
-        const horseCount = (Math.random() % 20) + 5
-        generateRandomHorses(map, horseCount, latitude, longitude, 5)
-      },
-      (error) => {
-        //MOVE TO BACKEND
-        console.error('Geolocation error!')
-        const horseCount = (Math.random() % 20) + 5
-        generateRandomHorses(map, horseCount, DEFAULT_LAT, DEFAULT_LON, radius = 5)
-
-      }
-    )
-  }
-  else {
-    locationError.value = 'Geolocation not supported by your browser!'
-  }
-
-}
-
-//TEST - Must move to backend
+//TODO - TEST - Must move to backend
 function generateRandomHorses(map, count = 5, centerLat = DEFAULT_LAT, centerLon = DEFAULT_LON, radiusKm = 5) {
   const earthRadiusKm = 6371;
   const radiusDegrees = radiusKm / earthRadiusKm * (180 / Math.PI);
@@ -98,20 +74,27 @@ function generateRandomHorses(map, count = 5, centerLat = DEFAULT_LAT, centerLon
     const lon = centerLon + distance * Math.sin(angle)
 
     if (lat > -90 && lat < 90 && lon > -180 && lon < 180) {
-      L.marker([lat, lon], {icon: horseIcon}).addTo(map).bindPopup("Sunt un cal RANDOM!")
+      L.marker([lat, lon], { icon: horseIcon }).addTo(map).bindPopup("Sunt un cal RANDOM!")
     }
   }
 }
 
+//Watch the userStore for login + location updates
+watch(
+  () => [userStore.loggedIn, userStore.location],
+  ([loggedIn, location]) => {
+    if (loggedIn && location) {
+      const [lat, lon] = location
+      updateMapWithLocation(map, lat, lon)
+    }
+  },
+  { immediate: true, deep: true }
+)
+
+
 onMounted(() => {
   // Create the map
-  const map = initializeMap(DEFAULT_LAT, DEFAULT_LON, DEFAULT_ZOOM);
-  getUsersLocation(map)
-  // Add OpenStreetMap tile layer
-
-
-  // Example marker
-  //L.marker([46.77, 23.59]).addTo(map).bindPopup('Hello from Horse Share 🐴').openPopup()
+  map = initializeMap(DEFAULT_LAT, DEFAULT_LON, DEFAULT_ZOOM);
 })
 </script>
 
