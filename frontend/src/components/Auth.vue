@@ -9,8 +9,12 @@
         Login with Google
       </button>
 
-      <p v-if="userEmail" class="mt-6 text-gray-600 text-sm">
-        Logged in as: <span class="font-semibold">{{ userEmail }}</span>
+      <p v-if="userStore.loggedIn" class="mt-6 text-gray-600 text-sm">
+        Logged in as: <span class="font-semibold">{{ userStore.email }}</span>
+      </p>
+
+      <p v-if="loginError" class="mt-4 text-red-600 text-sm">
+        {{ loginError }}
       </p>
     </div>
   </div>
@@ -20,46 +24,54 @@
 import { ref } from "vue"
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth"
 import { auth } from "../firebase"
-import { userStore } from "../stores/userStores.js"
+import { userStore, startWatchingLocation } from "../stores/userStores.js"
 import { useUserLocation } from '../composables/useUserLocation.js'
 
-const userEmail = ref("")
 const loginError = ref(null)
 
 const API_URL = import.meta.env.VITE_API_URL // Read from .env
 
 const loginWithGoogle = async () => {
+  loginError.value = null // Clear previous errors
   const provider = new GoogleAuthProvider()
 
   try {
     const result = await signInWithPopup(auth, provider)
     const user = result.user
-    userEmail.value = user.email
 
     console.log("Logged in as:", user.email)
 
-    // Get user's location or fallback
+    // Get user's *initial* location or fallback
     const { locationError, getUserLocationAsync } = useUserLocation()
     const location = await getUserLocationAsync()
 
-    // Use the env API URL
+    // MODIFIED: Check for a location error and show it to the user
+    if (locationError.value) {
+      loginError.value = locationError.value
+    }
+
     await fetch(`${API_URL}/api/users`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         uid: user.uid,
         email: user.email,
-        location: location, // [lat, lon]
+        location: location, // Send the initial [lat, lon]
       }),
     })
 
+    // Update the global store
     userStore.uid = user.uid
     userStore.email = user.email
     userStore.location = location
     userStore.loggedIn = true
+
+    // Start live location tracking after login is complete 
+    startWatchingLocation()
+
   } catch (error) {
     console.error("Google login error:", error)
-    alert("Login failed. Check console for details.")
+    loginError.value = "Login failed. Check console for details."
   }
 }
 
