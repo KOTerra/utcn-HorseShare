@@ -74,81 +74,88 @@ function initializeMap(lat, lon, zoom) {
  * @param {Array<Object>} horses - Array of horse objects, each should have lat, lon, and id.
  */
 function addHorseMarkersToMap(mapInstance, horses) {
-    if (!mapInstance || !horses || !Array.isArray(horses)) return;
-    horseMarkers.clearLayers();
+  if (!mapInstance || !horses || !Array.isArray(horses)) return;
+  horseMarkers.clearLayers();
 
-    horses.forEach(horse => {
-        if (horse.lat && horse.lon) {
-            L.marker([horse.lat, horse.lon], { icon: horseIcon })
-                .addTo(horseMarkers) // Add to the layer group
-                .bindPopup(`Horse ID: ${horse.id || 'N/A'}<br>Name: ${horse.name || 'Unknown'}`) 
-        }
-    });
-    console.log(`📍 Successfully added ${horses.length} horse markers to the map.`);
+  horses.forEach(horse => {
+    if (horse.lat && horse.lon) {
+      L.marker([horse.lat, horse.lon], { icon: horseIcon })
+        .addTo(horseMarkers) // Add to the layer group
+        .bindPopup(`Horse ID: ${horse.id || 'N/A'}<br>Name: ${horse.name || 'Unknown'}`)
+    }
+  });
+  console.log(`📍 Successfully added ${horses.length} horse markers to the map.`);
 }
 
 /**
  * Main function to fetch horses (with backend generation handling) and display them.
  */
 async function fetchAndDisplayHorses() {
-    // The backend endpoint now handles checking for the DEFAULT_HORSE_COUNT and generating if needed.
-    const baseURL = `${API_URL}/api/horses`;
-    const apiURL = `${baseURL}/${DEFAULT_LAT}/${DEFAULT_LON}/${DEFAULT_RANGE}`;
+  // The backend endpoint now handles checking for the DEFAULT_HORSE_COUNT and generating if needed.
+  const baseURL = `${API_URL}/api/horses`;
+  const apiURL = `${baseURL}/${DEFAULT_LAT}/${DEFAULT_LON}/${DEFAULT_RANGE}`;
 
-    try {
-        const response = await fetch(apiURL);
-        const text = await response.text();
-        
-        console.log("Raw API Response Text:", text);
+  try {
+    const response = await fetch(apiURL);
+    const text = await response.text();
 
-        // 1. Check HTTP Status
-        if (!response.ok) {
-             throw new Error(`HTTP error! Status: ${response.status}. Body: ${text.substring(0, 100)}...`);
-        }
-        
-        let allHorses = [];
+    console.log("Raw API Response Text:", text);
 
-        // 2. Check Content and Parse JSON
-        if (text.trim().length > 0) {
-            try {
-                allHorses = JSON.parse(text);
-                
-                if (!Array.isArray(allHorses)) {
-                    console.warn("API response was not an array (Server sent non-array data). Using empty list.");
-                    allHorses = [];
-                }
-            } catch (e) {
-                console.error("❌ Failed to parse JSON body:", e);
-                console.error("Raw response text that failed to parse:", text);
-                throw new Error("Server returned invalid JSON format.");
-            }
-        } else {
-             console.log("Response body was empty. Assuming 0 existing horses.");
-        }
-        
-        // 3. Display
-        console.log(`Fetched and ensured sufficient horses: ${allHorses.length}`);
-        
-        if (map) {
-             addHorseMarkersToMap(map, allHorses);
-        } else {
-             console.error("Map object is not yet initialized!");
-        }
-
-    } catch (error) {
-        console.error('There was a critical problem fetching horses:', error);
+    // 1. Check HTTP Status
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}. Body: ${text.substring(0, 100)}...`);
     }
+
+    let allHorses = [];
+
+    // 2. Check Content and Parse JSON
+    if (text.trim().length > 0) {
+      try {
+        allHorses = JSON.parse(text);
+
+        if (!Array.isArray(allHorses)) {
+          console.warn("API response was not an array (Server sent non-array data). Using empty list.");
+          allHorses = [];
+        }
+      } catch (e) {
+        console.error("❌ Failed to parse JSON body:", e);
+        console.error("Raw response text that failed to parse:", text);
+        throw new Error("Server returned invalid JSON format.");
+      }
+    } else {
+      console.log("Response body was empty. Assuming 0 existing horses.");
+    }
+
+    // 3. Display
+    console.log(`Fetched and ensured sufficient horses: ${allHorses.length}`);
+
+    if (map) {
+      addHorseMarkersToMap(map, allHorses);
+    } else {
+      console.error("Map object is not yet initialized!");
+    }
+
+  } catch (error) {
+    console.error('There was a critical problem fetching horses:', error);
+  }
 }
 
+const firstLocationUpdate = ref(true);
 
 function updateMapWithLocation(mapInstance, lat, lon) {
   const newLatLng = [lat, lon]
 
-  mapInstance.setView(newLatLng, 15);
+  if (firstLocationUpdate.value == true) {
+    mapInstance.setView(newLatLng, 15);
+    userMarker.value.setLatLng(newLatLng)
+    userMarker.value.setPopupContent('Hello from Horse Share 🐴');
+    userMarker.value.openPopup()
+    firstLocationUpdate.value = false;
+  }
+  else {
 
-  userMarker.value.setLatLng(newLatLng)
-  userMarker.value.setPopupContent('Hello from Horse Share 🐴');
-  userMarker.value.openPopup()
+    userMarker.value.setLatLng(newLatLng)
+  }
 }
 
 
@@ -169,7 +176,7 @@ watch(
 
 onMounted(async () => {
   map = initializeMap(DEFAULT_LAT, DEFAULT_LON, DEFAULT_ZOOM);
-  
+
   await fetchAndDisplayHorses();
 })
 </script>
