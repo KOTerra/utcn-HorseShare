@@ -1,11 +1,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import logo from '../assets/logo.png'
+const API_URL = import.meta.env.VITE_API_URL // Read from .env
 
 const message = ref('Loading...')
 
 onMounted(async () => {
-  const res = await fetch('http://localhost:8000/api/hello')
+  const res = await fetch(`${API_URL}/api/hello`)
   const data = await res.json()
   message.value = data.message
 })
