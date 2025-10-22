@@ -4,4 +4,9 @@ backend/keys/studio-8626045391-660a8-firebase-adminsdk-fbsvc-ecf10c7bfe.json
 /frontend/.vscode
 *.code-workspace
 /.idea
+<<<<<<< HEAD
+/frontend/.env
+.vscode
+=======
 frontend/.env
+>>>>>>> 18ad55e247f52be7b5fed83548cc28896cfdaf28
