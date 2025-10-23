@@ -4,8 +4,7 @@ from pydantic import BaseModel
 import firebase_admin
 from firebase_admin import credentials, db
 from typing import Tuple, List, Dict, Any
-from horse_utils import generate_horses
-from horse_utils import is_in_range
+from horse_utils import generate_horses, process_horse_data
 
 cred = credentials.Certificate("keys/firebase-key.json")
 firebase_admin.initialize_app(cred, {
@@ -16,18 +15,16 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+
 class UserData(BaseModel):
     uid: str
     email: str
-    location : Tuple[float, float]
-    
-DEFAULT_HORSE_COUNT = 25 
-
+    location: Tuple[float, float]
 
 
 @app.get("/api/hello")
@@ -45,7 +42,7 @@ async def save_user(user: UserData):
     try:
         ref = db.reference(f"users/{user.uid}")
         ref.set({"email": user.email,
-                 "location" : user.location})
+                 "location": user.location})
         return {"message": f"User  {user.uid} email saved successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -63,53 +60,26 @@ async def get_user(uid: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-
-
 @app.get("/api/horses/{lat}/{lon}/{range}")
-async def get_horses_in_range(lat : float, lon : float, range : int) -> List[Dict[str, Any]]:
-    """
-    Fetches horses in range, and if the count is below DEFAULT_HORSE_COUNT, 
-    it generates, saves, and includes the new horses in the final returned list.
-    """
-    try: 
-        ref = db.reference("horses")
-        all_horses_data = ref.get()
-        filtered_horses = []
-        
-        # 1. FILTER existing horses in range
-        if all_horses_data:
-            for horse_id, horse_data in all_horses_data.items():
-                if is_in_range(horse_data["lat"], horse_data["lon"], lat, lon, range):
-                    horse_data["id"] = horse_id
-                    filtered_horses.append(horse_data)
+async def get_horses_in_range(lat: float, lon: float, range: int) -> List[Dict[str, Any]]:
+    try:
+        db_ref = db.reference("horses")
+        all_horses_data = db_ref.get()
 
-        current_no_of_horses = len(filtered_horses)
-        
-        print(f"Found {current_no_of_horses} horses in range {range}km.")
-        
-        # 2. CHECK and GENERATE missing horses
-        if current_no_of_horses < DEFAULT_HORSE_COUNT:
-            horses_to_generate = DEFAULT_HORSE_COUNT - current_no_of_horses
-            print(f"Target count is {DEFAULT_HORSE_COUNT}. Generating {horses_to_generate} new horses...")
+        (filtered_horses, new_horses_to_save) = process_horse_data(all_horses_data, lat, lon, range)
 
-            
-            new_horse_list = generate_horses(lat, lon, range, horses_to_generate)
-            
-            # Save new horses to DB and add them to the filtered list
-            for horse in new_horse_list:
-                result = ref.push({
-                    "lat": horse["lat"], 
-                    "lon": horse["lon"], 
+        if new_horses_to_save:
+            for horse in new_horses_to_save:
+                result = db_ref.push({
+                    "lat": horse["lat"],
+                    "lon": horse["lon"],
                     "name": horse["name"]
                 })
-                
-
                 horse["id"] = result.key
-                filtered_horses.append(horse)
 
-            print(f"Successfully generated and saved {len(new_horse_list)} horses.")
+            filtered_horses.extend(new_horses_to_save)
+
         return filtered_horses
-        
-    except Exception as e:
-        print(f"FATAL SERVER ERROR in get_horses_in_range: {e}")
+
+    except Exception:
         raise HTTPException(status_code=500, detail="Internal server error fetching/generating horses.")
