@@ -7,31 +7,26 @@ from typing import Tuple, List, Dict, Any
 from horse_utils import generate_horses
 from horse_utils import is_in_range
 
-# Initialize Firebase Admin
 cred = credentials.Certificate("keys/firebase-key.json")
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://studio-8626045391-660a8-default-rtdb.europe-west1.firebasedatabase.app/'
 })
 
-# FastAPI app
 app = FastAPI()
 
-# Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # change to your frontend URL in production
+    allow_origins=["*"],  
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Pydantic model
 class UserData(BaseModel):
     uid: str
     email: str
     location : Tuple[float, float]
     
-# --- CONSTANT ---
-DEFAULT_HORSE_COUNT = 25 # Target number of horses to maintain in the range
+DEFAULT_HORSE_COUNT = 25 
 
 
 
@@ -39,11 +34,12 @@ DEFAULT_HORSE_COUNT = 25 # Target number of horses to maintain in the range
 async def hello():
     return {"message": "Hello from FastAPI!"}
 
+
 @app.get("/api/bye")
 async def bye():
     return {"message": "Bye from FastAPI!"}
 
-# PUT endpoint to save user 
+
 @app.put("/api/users")
 async def save_user(user: UserData):
     try:
@@ -53,6 +49,7 @@ async def save_user(user: UserData):
         return {"message": f"User  {user.uid} email saved successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/users/{uid}")
 async def get_user(uid: str):

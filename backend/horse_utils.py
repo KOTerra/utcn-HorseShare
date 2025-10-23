@@ -56,22 +56,4 @@ def is_in_range(horse_lat: float, horse_lon: float, center_lat: float, center_lo
     distance_km = earth_radius_km * c
     return distance_km < max_range_km
 
-#original func 
-#horse
-# //TODO - TEST - Must move to backend
-# function generateRandomHorses(map, count = 5, centerLat = DEFAULT_LAT, centerLon = DEFAULT_LON, radiusKm = 5) {
-#   const earthRadiusKm = 6371;
-#   const radiusDegrees = radiusKm / earthRadiusKm * (180 / Math.PI);
-
-#   for (let i = 0; i < count; i++) {
-#     const distance = Math.random() * radiusDegrees;
-#     const angle = Math.random() * 2 * Math.PI;
-
-#     const lat = centerLat + distance * Math.cos(angle)
-#     const lon = centerLon + distance * Math.sin(angle)
-
-#     if (lat > -90 && lat < 90 && lon > -180 && lon < 180) {
-#       L.marker([lat, lon], { icon: horseIcon }).addTo(map).bindPopup("Sunt un cal RANDOM!")
-#     }
-#   }
-#}
+#
