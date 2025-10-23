@@ -178,6 +178,12 @@ onMounted(async () => {
   map = initializeMap(DEFAULT_LAT, DEFAULT_LON, DEFAULT_ZOOM);
 
   await fetchAndDisplayHorses();
+  
+  setTimeout(() => {
+    if (map) {
+      map.invalidateSize();
+    }
+  }, 100);
 })
 </script>
 
