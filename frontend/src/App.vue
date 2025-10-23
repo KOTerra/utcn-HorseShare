@@ -6,8 +6,9 @@ import Auth from './components/Auth.vue'
 
 <template>
   <main class="text-center text-2xl p-6 space-y-6">
-   <MapView /> 
-   <HelloMessage /> 
-   <Auth/>
+    <MapView />
+    <Auth />
+    <HelloMessage />
+
   </main>
 </template>

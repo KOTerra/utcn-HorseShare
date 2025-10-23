@@ -9,6 +9,21 @@
         Login with Google
       </button>
 
+      <div class="role-toggle">
+        <label :class="['role-btn', role === 'Rider' ? 'active' : '']">
+          <input type="radio" name="role" value="Rider" v-model="role" />
+          Rider
+        </label>
+
+        <label :class="['role-btn', role === 'Carriage Driver' ? 'active' : '']">
+          <input type="radio" name="role" value="Carriage Driver" v-model="role" />
+          Carriage Driver
+        </label>
+      </div>
+
+      <p class="selected-role">Selected role: {{ role }}</p>
+
+
       <p v-if="userStore.loggedIn" class="mt-6 text-gray-600 text-sm">
         Logged in as: <span class="font-semibold">{{ userStore.email }}</span>
       </p>
@@ -28,7 +43,7 @@ import { userStore, startWatchingLocation } from "../stores/userStores.js"
 import { useUserLocation } from '../composables/useUserLocation.js'
 
 const loginError = ref(null)
-
+const role = ref("Rider")
 const API_URL = import.meta.env.VITE_API_URL // Read from .env
 
 const loginWithGoogle = async () => {

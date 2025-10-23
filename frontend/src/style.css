@@ -1,5 +1,56 @@
-@import "tailwindcss";
+/* @import "tailwindcss"; */
 
+
+
+h1 {
+  margin-bottom: 1.5rem;
+  color: #ffffff;
+}
+
+/* Role buttons container */
+.role-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Base button style */
+.role-btn {
+  display: inline-block;
+  padding: 0.6rem 1.5rem;
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  background-color: #f9f9f9;
+  color: #333;
+  user-select: none;
+}
+
+/* Hover effect */
+.role-btn:hover {
+  background-color: #e0e0e0;
+}
+
+/* Active (selected) state */
+.role-btn.active {
+  background-color: #1e40af;
+  color: white;
+  border-color: #1e40af;
+}
+
+/* Hide native radio input */
+.role-btn input[type="radio"] {
+  display: none;
+}
+
+/* Selected role text */
+.selected-role {
+  font-weight: 500;
+  color: #ffffff;
+}
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
