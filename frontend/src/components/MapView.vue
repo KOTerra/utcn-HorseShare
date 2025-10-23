@@ -20,21 +20,23 @@ L.Icon.Default.mergeOptions({
 // -----------------------------
 
 const userMarker = ref(null)
-const locationError = ref(null)
 
 const DEFAULT_LAT = 46.77 // cluj napoca
 const DEFAULT_LON = 23.59
-const DEFAULT_ZOOM = 13 // A sensible default zoom level
-const DEFAULT_RANGE = 5 // Kilometers
-const DEFAULT_HORSE_COUNT = 25 // Target count (used by the backend)
+const DEFAULT_ZOOM = 13
+const DEFAULT_RANGE = 3 // km
+
+// tracks center of the last successful horse fetch
+const lastFetchCenter = ref({ lat: null, lon: null }); 
+// How far the user must move to trigger a new fetch.
+const FETCH_TRIGGER_DISTANCE = DEFAULT_RANGE / 2; 
+
 
 const isLoggedIn = computed(() => userStore.loggedIn)
 const userEmail = computed(() => userStore.email)
 const userLocation = computed(() => userStore.location)
 
-
-
-let map = null; // Map instance
+let map = null;
 let horseMarkers = L.layerGroup(); // Group to manage and clear horse markers easily
 
 const horseIcon = L.icon({
@@ -52,6 +54,23 @@ const carriageIcon = L.icon({
 })
 
 
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth radius in km
+  const toRad = (dgr) => (dgr * Math.PI) / 180;
+
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const rLat1 = toRad(lat1);
+  const rLat2 = toRad(lat2);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(rLat1) * Math.cos(rLat2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+
 function initializeMap(lat, lon, zoom) {
   const mapInstance = L.map('map').setView([lat, lon], zoom)
 
@@ -61,27 +80,24 @@ function initializeMap(lat, lon, zoom) {
       '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(mapInstance)
 
-  userMarker.value = L.marker([lat, lon]).addTo(mapInstance).bindPopup('Hello from Horse Share 🐴').openPopup()
+  // Only add the user marker if they are logged in
+  if (isLoggedIn.value) {
+    userMarker.value = L.marker([lat, lon]).addTo(mapInstance).bindPopup('Hello from Horse Share 🐴').openPopup()
+  }
+  
   horseMarkers.addTo(mapInstance);
-
   return mapInstance
 }
 
-/**
- * Adds an array of horse objects to the map as markers.
- * Clears existing horse markers first.
- * @param {L.Map} mapInstance - The Leaflet map instance.
- * @param {Array<Object>} horses - Array of horse objects, each should have lat, lon, and id.
- */
 function addHorseMarkersToMap(mapInstance, horses) {
-  if (!mapInstance || !horses || !Array.isArray(horses)) return;
+  if (!mapInstance || !horses || !Array.isArray(horses)) {return;}
   horseMarkers.clearLayers();
 
   horses.forEach(horse => {
     if (horse.lat && horse.lon) {
       L.marker([horse.lat, horse.lon], { icon: horseIcon })
         .addTo(horseMarkers) // Add to the layer group
-        .bindPopup(`Horse ID: ${horse.id || 'N/A'}<br>Name: ${horse.name || 'Unknown'}`)
+        .bindPopup(`Horse ID: ${horse.id}<br>Name: ${horse.name}`)
     }
   });
 }
@@ -89,45 +105,39 @@ function addHorseMarkersToMap(mapInstance, horses) {
 /**
  * Main function to fetch horses (with backend generation handling) and display them.
  */
-async function fetchAndDisplayHorses() {
-  // The backend endpoint now handles checking for the DEFAULT_HORSE_COUNT and generating if needed.
+async function fetchAndDisplayHorses(lat, lon, range) {
   const baseURL = `${API_URL}/api/horses`;
-  const apiURL = `${baseURL}/${DEFAULT_LAT}/${DEFAULT_LON}/${DEFAULT_RANGE}`;
+  const apiURL = `${baseURL}/${lat}/${lon}/${range}`;
+  
+  console.log(`Fetching horses for [${lat}, ${lon}] within ${range}km...`);
 
   try {
     const response = await fetch(apiURL);
     const text = await response.text();
 
-    console.log("Raw API Response Text:", text);
-
-    // 1. Check HTTP Status
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}. Body: ${text.substring(0, 100)}...`);
     }
 
     let allHorses = [];
-
-    // 2. Check Content and Parse JSON
     if (text.trim().length > 0) {
       try {
         allHorses = JSON.parse(text);
-
       } catch (e) {
         throw new Error("Server returned invalid JSON format.");
       }
     }
 
-    // 3. Display
     console.log(`Fetched and ensured sufficient horses: ${allHorses.length}`);
-
     if (map) {
       addHorseMarkersToMap(map, allHorses);
     } else {
       console.error("Map object is not yet initialized!");
     }
-
+    return true;
   } catch (error) {
     console.error('There was a critical problem fetching horses:', error);
+    return false;
   }
 }
 
@@ -135,6 +145,11 @@ const firstLocationUpdate = ref(true);
 
 function updateMapWithLocation(mapInstance, lat, lon) {
   const newLatLng = [lat, lon]
+
+  if (!userMarker.value) {
+    // If marker doesn't exist ( user just logged in)
+     userMarker.value = L.marker(newLatLng).addTo(mapInstance);
+  }
 
   if (firstLocationUpdate.value == true) {
     mapInstance.setView(newLatLng, 15);
@@ -144,31 +159,65 @@ function updateMapWithLocation(mapInstance, lat, lon) {
     firstLocationUpdate.value = false;
   }
   else {
-
     userMarker.value.setLatLng(newLatLng)
   }
 }
 
 
-//Watch the userStore for login + location updates
+//Watch the userStore for location updates
 watch(
-  () => [userStore.loggedIn, userStore.location],
-  ([loggedIn, location]) => {
-    if (loggedIn && location) {
-      const [lat, lon] = location
-      if (map) {
-        updateMapWithLocation(map, lat, lon)
+  () => userStore.location, // Only watch the location
+  async (newLocation) => {
+    if (isLoggedIn.value && newLocation && map) {
+      const [newLat, newLon] = newLocation;
+      
+      updateMapWithLocation(map, newLat, newLon);
+
+      // check if we need to fetch new horses
+      const distance = getDistance(
+        newLat, newLon,
+        lastFetchCenter.value.lat, lastFetchCenter.value.lon
+      );
+
+      // fetch if the user has moved far enough from the last fetch center
+      if (distance > FETCH_TRIGGER_DISTANCE) {
+        console.log(`User moved ${distance.toFixed(2)}km. Triggering new horse fetch.`);
+        
+        const success = await fetchAndDisplayHorses(newLat, newLon, DEFAULT_RANGE);
+        
+        // Only update the fetch center if the new fetch was successful
+        if (success) {
+          lastFetchCenter.value = { lat: newLat, lon: newLon };
+
+          map.setView([newLat, newLon], map.getZoom());
+        }
       }
     }
   },
-  { immediate: true, deep: true }
+  { deep: true } // No 'immediate', onMounted will handle the initial load
 )
 
 
 onMounted(async () => {
-  map = initializeMap(DEFAULT_LAT, DEFAULT_LON, DEFAULT_ZOOM);
+  let initialLat = DEFAULT_LAT;
+  let initialLon = DEFAULT_LON;
 
-  await fetchAndDisplayHorses();
+  // if user is logged in on mount, use their location for the map and fetch
+  if (userStore.loggedIn && userStore.location) {
+    [initialLat, initialLon] = userStore.location;
+    console.log("User logged in, using user location for initial load.");
+  } else {
+    console.log("User not logged in, using default location for initial load.");
+  }
+
+  map = initializeMap(initialLat, initialLon, DEFAULT_ZOOM);
+
+  // initial fetch
+  const success = await fetchAndDisplayHorses(initialLat, initialLon, DEFAULT_RANGE);
+  
+  if (success) {
+    lastFetchCenter.value = { lat: initialLat, lon: initialLon };
+  }
   
   setTimeout(() => {
     if (map) {
