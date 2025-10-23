@@ -1,7 +1,5 @@
 /* @import "tailwindcss"; */
 
-
-
 h1 {
   margin-bottom: 1.5rem;
   color: #ffffff;
@@ -36,9 +34,10 @@ h1 {
 
 /* Active (selected) state */
 .role-btn.active {
-  background-color: #1e40af;
+  /* Changed to turquoise (primary) */
+  background-color: rgb(117, 202, 185);
   color: white;
-  border-color: #1e40af;
+  border-color: rgb(117, 202, 185);
 }
 
 /* Hide native radio input */
@@ -58,7 +57,8 @@ h1 {
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgb(19, 185, 207);
+  /* Kept as turquoise (primary) */
+  color: rgb(117, 202, 185);
   background-color: #242424;
 
   font-synthesis: none;
@@ -69,11 +69,13 @@ h1 {
 
 a {
   font-weight: 500;
-  color: #646cff;
+  /* Kept as turquoise (primary) */
+  color: rgb(117, 202, 185);
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  /* Kept as brown (secondary accent) */
+  color: rgb(160, 86, 54);
 }
 
 body {
@@ -101,7 +103,8 @@ button {
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  /* Kept as turquoise (primary) */
+  border-color: rgb(117, 202, 185);
 }
 button:focus,
 button:focus-visible {
@@ -125,7 +128,8 @@ button:focus-visible {
     background-color: #ffffff;
   }
   a:hover {
-    color: #747bff;
+    /* Kept as brown (secondary accent) */
+    color: rgb(160, 86, 54);
   }
   button {
     background-color: #f9f9f9;

@@ -44,7 +44,7 @@ import { useUserLocation } from '../composables/useUserLocation.js'
 
 const loginError = ref(null)
 const role = ref("Rider")
-const API_URL = import.meta.env.VITE_API_URL // Read from .env
+const API_URL = import.meta.env.VITE_API_URL
 
 const loginWithGoogle = async () => {
   loginError.value = null // Clear previous errors

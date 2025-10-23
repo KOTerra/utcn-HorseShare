@@ -84,7 +84,6 @@ function addHorseMarkersToMap(mapInstance, horses) {
         .bindPopup(`Horse ID: ${horse.id || 'N/A'}<br>Name: ${horse.name || 'Unknown'}`)
     }
   });
-  console.log(`📍 Successfully added ${horses.length} horse markers to the map.`);
 }
 
 /**
@@ -113,17 +112,9 @@ async function fetchAndDisplayHorses() {
       try {
         allHorses = JSON.parse(text);
 
-        if (!Array.isArray(allHorses)) {
-          console.warn("API response was not an array (Server sent non-array data). Using empty list.");
-          allHorses = [];
-        }
       } catch (e) {
-        console.error("❌ Failed to parse JSON body:", e);
-        console.error("Raw response text that failed to parse:", text);
         throw new Error("Server returned invalid JSON format.");
       }
-    } else {
-      console.log("Response body was empty. Assuming 0 existing horses.");
     }
 
     // 3. Display
