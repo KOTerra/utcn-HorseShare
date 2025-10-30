@@ -27,13 +27,12 @@ const DEFAULT_ZOOM = 13
 const DEFAULT_RANGE = 3 // km
 
 // tracks center of the last successful horse fetch
-const lastFetchCenter = ref({ lat: null, lon: null }); 
+const lastFetchCenter = ref({ lat: null, lon: null });
 // How far the user must move to trigger a new fetch.
-const FETCH_TRIGGER_DISTANCE = DEFAULT_RANGE / 2; 
+const FETCH_TRIGGER_DISTANCE = DEFAULT_RANGE / 2;
 
 
 const isLoggedIn = computed(() => userStore.loggedIn)
-const userEmail = computed(() => userStore.email)
 const userLocation = computed(() => userStore.location)
 
 let map = null;
@@ -84,13 +83,13 @@ function initializeMap(lat, lon, zoom) {
   if (isLoggedIn.value) {
     userMarker.value = L.marker([lat, lon]).addTo(mapInstance).bindPopup('Hello from Horse Share 🐴').openPopup()
   }
-  
+
   horseMarkers.addTo(mapInstance);
   return mapInstance
 }
 
 function addHorseMarkersToMap(mapInstance, horses) {
-  if (!mapInstance || !horses || !Array.isArray(horses)) {return;}
+  if (!mapInstance || !horses || !Array.isArray(horses)) { return; }
   horseMarkers.clearLayers();
 
   horses.forEach(horse => {
@@ -102,13 +101,17 @@ function addHorseMarkersToMap(mapInstance, horses) {
   });
 }
 
+function addCarriagesMarkersToMap(mapInstance, drivers) {
+
+}
+
 /**
  * Main function to fetch horses (with backend generation handling) and display them.
  */
 async function fetchAndDisplayHorses(lat, lon, range) {
   const baseURL = `${API_URL}/api/horses`;
   const apiURL = `${baseURL}/${lat}/${lon}/${range}`;
-  
+
   console.log(`Fetching horses for [${lat}, ${lon}] within ${range}km...`);
 
   try {
@@ -141,6 +144,41 @@ async function fetchAndDisplayHorses(lat, lon, range) {
   }
 }
 
+async function fetchAndDisplayCarriages(lat, lon, range) {
+  const baseURL = `${API_URL}/api/drivers`;
+  const apiURL = `${baseURL}/${lat}/${lon}/${range}`;
+  console.log(`Fetching horses for [${lat}, ${lon}] within ${range}km...`);
+
+  try {
+    const response = await fetch(apiURL);
+    const text = response.text;
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}. Body: ${text.substring(0, 100)}...`);
+    }
+
+    let allDrivers = [];
+    if (text.trim().length > 0) {
+      try {
+        allDrivers = JSON.parse(text);
+      } catch (e) {
+        throw new Error("Server returned invalid JSON format.");
+      }
+    }
+    if (map) {
+      addCarriagesMarkersToMap(map, allDriverss)
+    }
+    else {
+      console.error('There was a critical problem fetching horses:', error);
+      return false;
+    }
+    return true;
+  }
+  catch (error) {
+    console.error('There was a critical problem fetching carriage drivers:', error);
+    return false;
+  }
+}
+
 const firstLocationUpdate = ref(true);
 
 function updateMapWithLocation(mapInstance, lat, lon) {
@@ -148,11 +186,11 @@ function updateMapWithLocation(mapInstance, lat, lon) {
 
   if (!userMarker.value) {
     // If marker doesn't exist ( user just logged in)
-    if(userStore.role == "Rider")
+    if (userStore.role == "Rider")
       userMarker.value = L.marker(newLatLng).addTo(mapInstance);
-    else if(userStore.role == "Carriage Driver")
-       userMarker.value = L.marker(newLatLng, { icon: carriageIcon }).addTo(mapInstance);
-      
+    else if (userStore.role == "Carriage Driver")
+      userMarker.value = L.marker(newLatLng, { icon: carriageIcon }).addTo(mapInstance);
+
   }
 
   if (firstLocationUpdate.value == true) {
@@ -174,7 +212,7 @@ watch(
   async (newLocation) => {
     if (isLoggedIn.value && newLocation && map) {
       const [newLat, newLon] = newLocation;
-      
+
       updateMapWithLocation(map, newLat, newLon);
 
       // check if we need to fetch new horses
@@ -186,8 +224,9 @@ watch(
       // fetch if the user has moved far enough from the last fetch center
       if (distance > FETCH_TRIGGER_DISTANCE) {
         console.log(`User moved ${distance.toFixed(2)}km. Triggering new horse fetch.`);
-        
+
         const success = await fetchAndDisplayHorses(newLat, newLon, DEFAULT_RANGE);
+        succes = success && await fetchAndDisplayCarriages(newLat, newLon, DEFAULT_RANGE);
         
         // Only update the fetch center if the new fetch was successful
         if (success) {
@@ -218,11 +257,11 @@ onMounted(async () => {
 
   // initial fetch
   const success = await fetchAndDisplayHorses(initialLat, initialLon, DEFAULT_RANGE);
-  
+
   if (success) {
     lastFetchCenter.value = { lat: initialLat, lon: initialLon };
   }
-  
+
   setTimeout(() => {
     if (map) {
       map.invalidateSize();
