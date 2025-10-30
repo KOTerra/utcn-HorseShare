@@ -148,7 +148,11 @@ function updateMapWithLocation(mapInstance, lat, lon) {
 
   if (!userMarker.value) {
     // If marker doesn't exist ( user just logged in)
-     userMarker.value = L.marker(newLatLng).addTo(mapInstance);
+    if(userStore.role == "Rider")
+      userMarker.value = L.marker(newLatLng).addTo(mapInstance);
+    else if(userStore.role == "Carriage Driver")
+       userMarker.value = L.marker(newLatLng, { icon: carriageIcon }).addTo(mapInstance);
+      
   }
 
   if (firstLocationUpdate.value == true) {

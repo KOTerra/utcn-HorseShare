@@ -21,12 +21,38 @@
         </label>
       </div>
 
-      <p class="selected-role">Selected role: {{ role }}</p>
-
+      <!-- --<p class="selected-role">Selected role: {{ role }}</p>-->
+      <!-- 
 
       <p v-if="userStore.loggedIn" class="mt-6 text-gray-600 text-sm">
-        Logged in as: <span class="font-semibold">{{ userStore.email }}</span>
-      </p>
+        Logged in as:
+        <span class="font-semibold">{{ userStore.email }}</span>
+        <span class="text-gray-500"> ({{ userStore.role }})</span>
+      </p> -->
+      <!-- Beautiful logged-in card -->
+      <div v-if="userStore.loggedIn" class="login-info" role="status" aria-live="polite">
+        <div class="login-card">
+          <!-- small circular avatar with initial -->
+          <div class="avatar" aria-hidden="true">
+            {{ userStore.email ? userStore.email.charAt(0).toUpperCase() : "?" }}
+          </div>
+
+          <!-- text column -->
+          <div class="login-meta">
+            <div class="login-line">
+              <span class="label">Logged in as</span>
+              <span class="login-email" title="User email">{{ userStore.email }}</span>
+            </div>
+
+            <div class="login-line small">
+              <span class="label">Role</span>
+              <span class="role-badge" :class="userStore.role === 'Carriage Driver' ? 'driver' : 'rider'">
+                {{ userStore.role }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <p v-if="loginError" class="mt-4 text-red-600 text-sm">
         {{ loginError }}
@@ -64,21 +90,33 @@ const loginWithGoogle = async () => {
     if (locationError.value) {
       loginError.value = locationError.value
     }
-
-    await fetch(`${API_URL}/api/users`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        uid: user.uid,
-        email: user.email,
-        location: location, // Send the initial [lat, lon]
-      }),
-    })
-
+    if (role.value == "Rider") {
+      await fetch(`${API_URL}/api/users`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          location: location, // Send the initial [lat, lon]
+        }),
+      })
+    }
+    else if (role.value == "Carriage Driver") {
+      await fetch(`${API_URL}/api/drivers`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          location: location,
+        }),
+      })
+    }
     // Update the global store
     userStore.uid = user.uid
     userStore.email = user.email
     userStore.location = location
+    userStore.role = role.value
     userStore.loggedIn = true
 
     // Start live location tracking after login is complete 

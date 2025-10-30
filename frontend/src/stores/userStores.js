@@ -3,6 +3,7 @@ import { reactive } from 'vue'
 export const userStore = reactive({
   uid: null,
   email: null,
+  role: null,
   location: [46.77, 23.59], // default Cluj-Napoca
   loggedIn: false,
   locationError: null,

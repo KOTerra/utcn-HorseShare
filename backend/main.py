@@ -26,6 +26,10 @@ class UserData(BaseModel):
     email: str
     location: Tuple[float, float]
 
+class DriverData(BaseModel):
+    uid: str
+    email: str
+    location: Tuple[float, float]
 
 @app.get("/api/hello")
 async def hello():
@@ -44,6 +48,17 @@ async def save_user(user: UserData):
         ref.set({"email": user.email,
                  "location": user.location})
         return {"message": f"User  {user.uid} email saved successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.put("/api/drivers")
+async def save_driver(driver: DriverData):
+    try:
+        ref = db.reference(f"drivers/{driver.uid}")
+        ref.set({"email": driver.email,
+                 "location": driver.location})
+        return {"message": f"User  {driver.uid} email saved successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
