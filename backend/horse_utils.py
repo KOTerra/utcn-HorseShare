@@ -51,7 +51,8 @@ def _filter_existing_horses(all_horses_data: Dict[str, Any], lat: float, lon: fl
         return filtered_list
 
     for horse_id, horse_data in all_horses_data.items():
-        if is_in_range(horse_data.get("lat"), horse_data.get("lon"), lat, lon, range_km):
+        location = horse_data.get("location")
+        if is_in_range(location[0], location[1], lat, lon, range_km):
             horse_data["id"] = horse_id
             filtered_list.append(horse_data)
     return filtered_list
@@ -59,7 +60,7 @@ def _filter_existing_horses(all_horses_data: Dict[str, Any], lat: float, lon: fl
 
 # --- Main Service Function ---
 
-def process_horse_data(all_horses_data: Dict[str, Any], lat: float, lon: float, range_km: int) \
+def process_horse_data(all_horses_data: object, lat: float, lon: float, range_km: int) \
         -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     """
     Processes horse data to filter existing and determine new horses to create.

@@ -37,6 +37,7 @@ const userLocation = computed(() => userStore.location)
 
 let map = null;
 let horseMarkers = L.layerGroup(); // Group to manage and clear horse markers easily
+let carriageMarkers = L.layerGroup(); // Group to manage and clear carriage markers easily
 
 const horseIcon = L.icon({
   iconUrl: horseIconUrl,
@@ -47,9 +48,9 @@ const horseIcon = L.icon({
 
 const carriageIcon = L.icon({
   iconUrl: carriageIconUrl,
-  iconSize: [30, 30],
-  iconAnchor: [15, 30],
-  popupAnchor: [0, -30]
+  iconSize: [60, 60],
+  iconAnchor: [30, 60],
+  popupAnchor: [0, -60]
 })
 
 
@@ -85,24 +86,50 @@ function initializeMap(lat, lon, zoom) {
   }
 
   horseMarkers.addTo(mapInstance);
+  carriageMarkers.addTo(mapInstance);
   return mapInstance
 }
 
-function addHorseMarkersToMap(mapInstance, horses) {
-  if (!mapInstance || !horses || !Array.isArray(horses)) { return; }
-  horseMarkers.clearLayers();
+function addHorseMarkersToMap(horses) {
+
+  if (horseMarkers) {
+    horseMarkers.clearLayers();
+  }
 
   horses.forEach(horse => {
-    if (horse.lat && horse.lon) {
-      L.marker([horse.lat, horse.lon], { icon: horseIcon })
-        .addTo(horseMarkers) // Add to the layer group
-        .bindPopup(`Horse ID: ${horse.id}<br>Name: ${horse.name}`)
-    }
+
+    const location = horse.location;
+
+    const lat = location[0];
+    const lon = location[1];
+
+    L.marker([lat, lon], { icon: horseIcon })
+      .addTo(horseMarkers)
+      .bindPopup(`Horse ID: ${horse.id || 'N/A'}<br>Name: ${horse.name || 'Unknown'}`);
+
+
   });
 }
 
-function addCarriagesMarkersToMap(mapInstance, drivers) {
+function addCarriagesMarkersToMap(drivers) {
 
+  if (carriageMarkers) {
+    carriageMarkers.clearLayers();
+  }
+
+  drivers.forEach(driver => {
+
+    const location = driver.location;
+
+    const lat = location[0];
+    const lon = location[1];
+
+    L.marker([lat, lon], { icon: carriageIcon })
+      .addTo(carriageMarkers)
+      .bindPopup(`Driver ID: ${driver.id || 'N/A'}<br>Name: ${driver.name || 'Unknown'}`);
+
+
+  });
 }
 
 /**
@@ -133,7 +160,7 @@ async function fetchAndDisplayHorses(lat, lon, range) {
 
     console.log(`Fetched and ensured sufficient horses: ${allHorses.length}`);
     if (map) {
-      addHorseMarkersToMap(map, allHorses);
+      addHorseMarkersToMap(allHorses);
     } else {
       console.error("Map object is not yet initialized!");
     }
@@ -147,29 +174,20 @@ async function fetchAndDisplayHorses(lat, lon, range) {
 async function fetchAndDisplayCarriages(lat, lon, range) {
   const baseURL = `${API_URL}/api/drivers`;
   const apiURL = `${baseURL}/${lat}/${lon}/${range}`;
-  console.log(`Fetching horses for [${lat}, ${lon}] within ${range}km...`);
+  console.log(`Fetching carriage drivers for [${lat}, ${lon}] within ${range}km...`);
 
   try {
     const response = await fetch(apiURL);
-    const text = response.text;
+
     if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}. Body: ${text.substring(0, 100)}...`);
+      const errorText = await response.text();
+      throw new Error(`HTTP error! Status: ${response.status}. Body: ${errorText.substring(0, 100)}...`);
     }
 
-    let allDrivers = [];
-    if (text.trim().length > 0) {
-      try {
-        allDrivers = JSON.parse(text);
-      } catch (e) {
-        throw new Error("Server returned invalid JSON format.");
-      }
-    }
+    const allDrivers = await response.json();
+
     if (map) {
-      addCarriagesMarkersToMap(map, allDriverss)
-    }
-    else {
-      console.error('There was a critical problem fetching horses:', error);
-      return false;
+      addCarriagesMarkersToMap(allDrivers);
     }
     return true;
   }
@@ -178,7 +196,6 @@ async function fetchAndDisplayCarriages(lat, lon, range) {
     return false;
   }
 }
-
 const firstLocationUpdate = ref(true);
 
 function updateMapWithLocation(mapInstance, lat, lon) {
@@ -225,9 +242,8 @@ watch(
       if (distance > FETCH_TRIGGER_DISTANCE) {
         console.log(`User moved ${distance.toFixed(2)}km. Triggering new horse fetch.`);
 
-        const success = await fetchAndDisplayHorses(newLat, newLon, DEFAULT_RANGE);
-        succes = success && await fetchAndDisplayCarriages(newLat, newLon, DEFAULT_RANGE);
-        
+        let success = await fetchAndDisplayHorses(newLat, newLon, DEFAULT_RANGE) && await fetchAndDisplayCarriages(newLat, newLon, DEFAULT_RANGE);
+
         // Only update the fetch center if the new fetch was successful
         if (success) {
           lastFetchCenter.value = { lat: newLat, lon: newLon };
@@ -237,7 +253,7 @@ watch(
       }
     }
   },
-  { deep: true } // No 'immediate', onMounted will handle the initial load
+  { deep: true }
 )
 
 

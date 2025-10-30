@@ -89,8 +89,7 @@ async def get_horses_in_range(lat: float, lon: float, range: int) -> List[Dict[s
         if new_horses_to_save:
             for horse in new_horses_to_save:
                 result = db_ref.push({
-                    "lat": horse["lat"],
-                    "lon": horse["lon"],
+                    "location": [horse["lat"], horse["lon"]],
                     "name": horse["name"]
                 })
                 horse["id"] = result.key
