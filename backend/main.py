@@ -5,6 +5,7 @@ import firebase_admin
 from firebase_admin import credentials, db
 from typing import Tuple, List, Dict, Any
 from horse_utils import generate_horses, process_horse_data
+from driver_utils import compute_drivers_in_range
 
 cred = credentials.Certificate("keys/firebase-key.json")
 firebase_admin.initialize_app(cred, {
@@ -26,10 +27,12 @@ class UserData(BaseModel):
     email: str
     location: Tuple[float, float]
 
+
 class DriverData(BaseModel):
     uid: str
     email: str
     location: Tuple[float, float]
+
 
 @app.get("/api/hello")
 async def hello():
@@ -98,3 +101,15 @@ async def get_horses_in_range(lat: float, lon: float, range: int) -> List[Dict[s
 
     except Exception:
         raise HTTPException(status_code=500, detail="Internal server error fetching/generating horses.")
+
+
+@app.get("/api/drivers/{lat}/{lon}/{range}")
+async def get_drivers_in_range(lat: float, lon: float, range: int) -> List[Dict[str, Any]]:
+    try:
+        db_ref = db.reference("drivers")
+        all_drivers_data = db_ref.get()
+
+        return compute_drivers_in_range(all_drivers_data, lat, lon, range)
+
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error fetching drivers.")
