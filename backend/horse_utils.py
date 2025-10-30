@@ -1,40 +1,10 @@
 import math
 import random
 from typing import List, Dict, Any, Tuple
+from map_utils import is_in_range, EARTH_RADIUS_KM
 
 # --- Constants ---
 DEFAULT_HORSE_COUNT = 20
-EARTH_RADIUS_KM = 6371.0  # Radius of Earth in kilometers
-
-
-# --- Geolocation Logic ---
-
-def is_in_range(horse_lat: float, horse_lon: float, center_lat: float, center_lon: float, range_km: int) -> bool:
-    """
-    Checks if a horse's coordinates are within a given range (in km) 
-    from a center point using the Haversine formula.
-    """
-    if horse_lat is None or horse_lon is None:
-        return False
-
-    try:
-        lat1_rad = math.radians(horse_lat)
-        lon1_rad = math.radians(horse_lon)
-        lat2_rad = math.radians(center_lat)
-        lon2_rad = math.radians(center_lon)
-
-        dlon = lon2_rad - lon1_rad
-        dlat = lat2_rad - lat1_rad
-
-        a = math.sin(dlat / 2) ** 2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2) ** 2
-        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-
-        distance = EARTH_RADIUS_KM * c
-        return distance <= range_km
-
-    except Exception as e:
-        print(f"Error calculating Haversine distance: {e}")
-        return False
 
 
 # --- Generation Logic ---
