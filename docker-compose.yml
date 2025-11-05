@@ -1,4 +1,5 @@
-# docker-compose.yml
+version: "3.9"
+
 services:
   frontend:
     build:
@@ -12,9 +13,9 @@ services:
     depends_on:
       - backend
     volumes:
-      - ./frontend:/app        # 👈 Mount local frontend folder
-      - /app/node_modules      # 👈 Prevent overwriting node_modules
-
+      - ./frontend:/app          # Mount local frontend folder
+      - /app/node_modules        # Preserve container node_modules
+    command: sh -c "npm install --legacy-peer-deps && npm run dev -- --host 0.0.0.0"
 
   backend:
     build:
@@ -24,3 +25,4 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8000"

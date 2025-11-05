@@ -11,6 +11,8 @@
   "dependencies": {
     "firebase": "^12.4.0",
     "leaflet": "^1.9.4",
+    "leaflet-routing-machine": "^3.2.12",
+    "leaflet-control-geocoder": "^2.4.0",
     "vue": "^3.5.22"
   },
   "devDependencies": {

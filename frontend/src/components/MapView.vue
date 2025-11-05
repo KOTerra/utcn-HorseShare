@@ -8,6 +8,13 @@ import { userStore } from "../stores/userStores.js"
 import 'leaflet/dist/images/marker-icon.png';
 import 'leaflet/dist/images/marker-shadow.png'
 
+// --- Leaflet Routing & Search ---
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
+import 'leaflet-routing-machine'
+import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
+import 'leaflet-control-geocoder'
+// ---------------------------------
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 // --- Leaflet Configuration ---
@@ -21,23 +28,21 @@ L.Icon.Default.mergeOptions({
 
 const userMarker = ref(null)
 
-const DEFAULT_LAT = 46.77 // cluj napoca
+const DEFAULT_LAT = 46.77 // Cluj Napoca
 const DEFAULT_LON = 23.59
 const DEFAULT_ZOOM = 13
 const DEFAULT_RANGE = 3 // km
 
-// tracks center of the last successful horse fetch
 const lastFetchCenter = ref({ lat: null, lon: null });
-// How far the user must move to trigger a new fetch.
 const FETCH_TRIGGER_DISTANCE = DEFAULT_RANGE / 2;
-
 
 const isLoggedIn = computed(() => userStore.loggedIn)
 const userLocation = computed(() => userStore.location)
 
 let map = null;
-let horseMarkers = L.layerGroup(); // Group to manage and clear horse markers easily
-let carriageMarkers = L.layerGroup(); // Group to manage and clear carriage markers easily
+let horseMarkers = L.layerGroup();
+let carriageMarkers = L.layerGroup();
+let routingControl = null;
 
 const horseIcon = L.icon({
   iconUrl: horseIconUrl,
@@ -53,9 +58,8 @@ const carriageIcon = L.icon({
   popupAnchor: [0, -60]
 })
 
-
 function getDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Earth radius in km
+  const R = 6371;
   const toRad = (dgr) => (dgr * Math.PI) / 180;
 
   const dLat = toRad(lat2 - lat1);
@@ -70,7 +74,6 @@ function getDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-
 function initializeMap(lat, lon, zoom) {
   const mapInstance = L.map('map').setView([lat, lon], zoom)
 
@@ -80,90 +83,82 @@ function initializeMap(lat, lon, zoom) {
       '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(mapInstance)
 
-  // Only add the user marker if they are logged in
   if (isLoggedIn.value) {
     userMarker.value = L.marker([lat, lon]).addTo(mapInstance).bindPopup('Hello from Horse Share 🐴').openPopup()
   }
 
   horseMarkers.addTo(mapInstance);
   carriageMarkers.addTo(mapInstance);
+
+  // --- SEARCH BAR & ROUTING ---
+  const geocoder = L.Control.geocoder({
+    defaultMarkGeocode: false,
+    collapsed: false,
+    placeholder: 'Search location...'
+  })
+    .on('markgeocode', function(e) {
+      const destLatLng = e.geocode.center;
+
+      if (routingControl) mapInstance.removeControl(routingControl);
+
+      if (userMarker.value) {
+        routingControl = L.Routing.control({
+          waypoints: [
+            userMarker.value.getLatLng(),
+            destLatLng
+          ],
+          routeWhileDragging: true
+        }).addTo(mapInstance);
+      }
+
+      mapInstance.fitBounds(L.latLngBounds([userMarker.value.getLatLng(), destLatLng]));
+    })
+    .addTo(mapInstance);
+  // -----------------------------
+
   return mapInstance
 }
 
 function addHorseMarkersToMap(horses) {
-
-  if (horseMarkers) {
-    horseMarkers.clearLayers();
-  }
+  if (horseMarkers) horseMarkers.clearLayers();
 
   horses.forEach(horse => {
-
-    const location = horse.location;
-
-    const lat = location[0];
-    const lon = location[1];
+    const [lat, lon] = horse.location;
 
     L.marker([lat, lon], { icon: horseIcon })
       .addTo(horseMarkers)
       .bindPopup(`Horse ID: ${horse.id || 'N/A'}<br>Name: ${horse.name || 'Unknown'}`);
-
-
   });
 }
 
 function addCarriagesMarkersToMap(drivers) {
-
-  if (carriageMarkers) {
-    carriageMarkers.clearLayers();
-  }
+  if (carriageMarkers) carriageMarkers.clearLayers();
 
   drivers.forEach(driver => {
-
-    const location = driver.location;
-
-    const lat = location[0];
-    const lon = location[1];
+    const [lat, lon] = driver.location;
 
     L.marker([lat, lon], { icon: carriageIcon })
       .addTo(carriageMarkers)
       .bindPopup(`Driver ID: ${driver.id || 'N/A'}<br>Name: ${driver.name || 'Unknown'}`);
-
-
   });
 }
 
-/**
- * Main function to fetch horses (with backend generation handling) and display them.
- */
 async function fetchAndDisplayHorses(lat, lon, range) {
   const baseURL = `${API_URL}/api/horses`;
   const apiURL = `${baseURL}/${lat}/${lon}/${range}`;
-
-  console.log(`Fetching horses for [${lat}, ${lon}] within ${range}km...`);
 
   try {
     const response = await fetch(apiURL);
     const text = await response.text();
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}. Body: ${text.substring(0, 100)}...`);
-    }
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}. Body: ${text.substring(0, 100)}...`);
 
     let allHorses = [];
     if (text.trim().length > 0) {
-      try {
-        allHorses = JSON.parse(text);
-      } catch (e) {
-        throw new Error("Server returned invalid JSON format.");
-      }
+      allHorses = JSON.parse(text);
     }
 
-    console.log(`Fetched and ensured sufficient horses: ${allHorses.length}`);
-    if (map) {
-      addHorseMarkersToMap(allHorses);
-    } else {
-      console.error("Map object is not yet initialized!");
-    }
+    if (map) addHorseMarkersToMap(allHorses);
     return true;
   } catch (error) {
     console.error('There was a critical problem fetching horses:', error);
@@ -174,114 +169,83 @@ async function fetchAndDisplayHorses(lat, lon, range) {
 async function fetchAndDisplayCarriages(lat, lon, range) {
   const baseURL = `${API_URL}/api/drivers`;
   const apiURL = `${baseURL}/${lat}/${lon}/${range}`;
-  console.log(`Fetching carriage drivers for [${lat}, ${lon}] within ${range}km...`);
 
   try {
     const response = await fetch(apiURL);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP error! Status: ${response.status}. Body: ${errorText.substring(0, 100)}...`);
-    }
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}. Body: ${await response.text().substring(0,100)}...`);
 
     const allDrivers = await response.json();
-
-    if (map) {
-      addCarriagesMarkersToMap(allDrivers);
-    }
+    if (map) addCarriagesMarkersToMap(allDrivers);
     return true;
-  }
-  catch (error) {
+  } catch (error) {
     console.error('There was a critical problem fetching carriage drivers:', error);
     return false;
   }
 }
+
 const firstLocationUpdate = ref(true);
 
 function updateMapWithLocation(mapInstance, lat, lon) {
   const newLatLng = [lat, lon]
 
   if (!userMarker.value) {
-    // If marker doesn't exist ( user just logged in)
     if (userStore.role == "Rider")
       userMarker.value = L.marker(newLatLng).addTo(mapInstance);
     else if (userStore.role == "Carriage Driver")
       userMarker.value = L.marker(newLatLng, { icon: carriageIcon }).addTo(mapInstance);
-
   }
 
-  if (firstLocationUpdate.value == true) {
+  if (firstLocationUpdate.value) {
     mapInstance.setView(newLatLng, 15);
     userMarker.value.setLatLng(newLatLng)
     userMarker.value.setPopupContent('Hello from Horse Share 🐴');
     userMarker.value.openPopup()
     firstLocationUpdate.value = false;
-  }
-  else {
+  } else {
     userMarker.value.setLatLng(newLatLng)
   }
 }
 
-
-//Watch the userStore for location updates
 watch(
-  () => userStore.location, // Only watch the location
+  () => userStore.location,
   async (newLocation) => {
     if (isLoggedIn.value && newLocation && map) {
       const [newLat, newLon] = newLocation;
 
       updateMapWithLocation(map, newLat, newLon);
 
-      // check if we need to fetch new horses
       const distance = getDistance(
         newLat, newLon,
         lastFetchCenter.value.lat, lastFetchCenter.value.lon
       );
 
-      // fetch if the user has moved far enough from the last fetch center
       if (distance > FETCH_TRIGGER_DISTANCE) {
-        console.log(`User moved ${distance.toFixed(2)}km. Triggering new horse fetch.`);
+        let success = await fetchAndDisplayHorses(newLat, newLon, DEFAULT_RANGE) &&
+                      await fetchAndDisplayCarriages(newLat, newLon, DEFAULT_RANGE);
 
-        let success = await fetchAndDisplayHorses(newLat, newLon, DEFAULT_RANGE) && await fetchAndDisplayCarriages(newLat, newLon, DEFAULT_RANGE);
-
-        // Only update the fetch center if the new fetch was successful
-        if (success) {
-          lastFetchCenter.value = { lat: newLat, lon: newLon };
-
-          map.setView([newLat, newLon], map.getZoom());
-        }
+        if (success) lastFetchCenter.value = { lat: newLat, lon: newLon };
+        map.setView([newLat, newLon], map.getZoom());
       }
     }
   },
   { deep: true }
 )
 
-
 onMounted(async () => {
   let initialLat = DEFAULT_LAT;
   let initialLon = DEFAULT_LON;
 
-  // if user is logged in on mount, use their location for the map and fetch
   if (userStore.loggedIn && userStore.location) {
     [initialLat, initialLon] = userStore.location;
-    console.log("User logged in, using user location for initial load.");
-  } else {
-    console.log("User not logged in, using default location for initial load.");
   }
 
   map = initializeMap(initialLat, initialLon, DEFAULT_ZOOM);
 
-  // initial fetch
   const success = await fetchAndDisplayHorses(initialLat, initialLon, DEFAULT_RANGE);
-
-  if (success) {
-    lastFetchCenter.value = { lat: initialLat, lon: initialLon };
-  }
+  if (success) lastFetchCenter.value = { lat: initialLat, lon: initialLon };
 
   setTimeout(() => {
-    if (map) {
-      map.invalidateSize();
-    }
+    if (map) map.invalidateSize();
   }, 100);
 })
 </script>
