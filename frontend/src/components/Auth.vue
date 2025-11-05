@@ -98,6 +98,7 @@ const loginWithGoogle = async () => {
           uid: user.uid,
           email: user.email,
           location: location, // Send the initial [lat, lon]
+          loggedIn: true
         }),
       })
     }
@@ -109,6 +110,7 @@ const loginWithGoogle = async () => {
           uid: user.uid,
           email: user.email,
           location: location,
+          loggedIn: false
         }),
       })
     }

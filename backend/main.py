@@ -35,12 +35,13 @@ class UserData(BaseModel):
     uid: str
     email: str
     location: List[float] 
+    loggedIn : bool
 
 class DriverData(BaseModel):
     uid: str
     email: str
     location: List[float] 
-
+    loggedIn : bool
 
 @app.get("/api/hello")
 async def hello():
@@ -57,7 +58,8 @@ async def save_user(user: UserData):
     try:
         ref = db.reference(f"users/{user.uid}")
         ref.set({"email": user.email,
-                 "location": user.location})
+                 "location": user.location,
+                  "loggedIn": user.loggedIn})
         return {"message": f"User  {user.uid} email saved successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -68,7 +70,8 @@ async def save_driver(driver: DriverData):
     try:
         ref = db.reference(f"drivers/{driver.uid}")
         ref.set({"email": driver.email,
-                 "location": driver.location})
+                 "location": driver.location,
+                 "loggedIn" : driver.loggedIn})
         return {"message": f"User  {driver.uid} email saved successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
