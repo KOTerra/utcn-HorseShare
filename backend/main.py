@@ -1,11 +1,12 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import firebase_admin
 from firebase_admin import credentials, db
-from typing import Tuple, List, Dict, Any
+from typing import List, Dict, Any # <-- Removed Tuple, added List
 from horse_utils import generate_horses, process_horse_data
 from driver_utils import compute_drivers_in_range
+from starlette.responses import Response
 
 cred = credentials.Certificate("keys/firebase-key.json")
 firebase_admin.initialize_app(cred, {
@@ -14,6 +15,7 @@ firebase_admin.initialize_app(cred, {
 
 app = FastAPI()
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,17 +23,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
+    return response
+
+
 
 class UserData(BaseModel):
     uid: str
     email: str
-    location: Tuple[float, float]
-
+    location: List[float] 
 
 class DriverData(BaseModel):
     uid: str
     email: str
-    location: Tuple[float, float]
+    location: List[float] 
 
 
 @app.get("/api/hello")
@@ -112,3 +120,8 @@ async def get_drivers_in_range(lat: float, lon: float, range: int) -> List[Dict[
 
     except Exception:
         raise HTTPException(status_code=500, detail="Internal server error fetching drivers.")
+
+
+@app.get("/")
+async def read_root():
+    return {"message": "Server is running"}
