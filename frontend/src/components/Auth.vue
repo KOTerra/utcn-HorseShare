@@ -67,7 +67,7 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth"
 import { auth } from "../firebase"
 import { userStore, startWatchingLocation } from "../stores/userStores.js"
 import { useUserLocation } from '../composables/useUserLocation.js'
-
+import { startHeartbeat } from "../composables/heartbeat.js"
 const loginError = ref(null)
 const role = ref("Rider")
 const API_URL = import.meta.env.VITE_API_URL
@@ -123,6 +123,8 @@ const loginWithGoogle = async () => {
 
     // Start live location tracking after login is complete 
     startWatchingLocation()
+
+    startHeartbeat()
 
   } catch (error) {
     console.error("Google login error:", error)

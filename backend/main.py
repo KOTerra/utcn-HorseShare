@@ -1,12 +1,20 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from datetime import datetime
+from datetime import timezone
 import firebase_admin
 from firebase_admin import credentials, db
 from typing import List, Dict, Any # <-- Removed Tuple, added List
 from horse_utils import generate_horses, process_horse_data
 from driver_utils import compute_drivers_in_range
 from starlette.responses import Response
+import asyncio
+from datetime import timedelta 
+from typing import Literal 
+
+LOGOUT_THRESHOLD_INTERVALS = 30 
+CLEANUP_INTERVAL_SECONDS = 60
 
 cred = credentials.Certificate("keys/firebase-key.json")
 firebase_admin.initialize_app(cred, {
@@ -36,12 +44,17 @@ class UserData(BaseModel):
     email: str
     location: List[float] 
     loggedIn : bool
+    lastActiveAt : datetime 
 
 class DriverData(BaseModel):
     uid: str
     email: str
     location: List[float] 
     loggedIn : bool
+    lastActiveAt : datetime
+
+class HeartbeatInput(BaseModel):
+    uid: str
 
 @app.get("/api/hello")
 async def hello():
@@ -88,6 +101,105 @@ async def get_user(uid: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/api/users/heartbeat")
+async def get_users_heartbeat(data: HeartbeatInput):
+    """
+        Recieves a heartbeat ping from the cliend and updates the lastActiveTime
+    """
+    try:
+        now_utc = datetime.now(timezone.utc)
+        ref = db.reference(f"users/{data.uid}")
+        ref.update({
+            "lastActiveAt": now_utc.isoformat(),
+            "loggedIn": True
+        })
+        
+        return {"message" : f"Heartbeat recieved from user {data.uid}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to process heartbeat")
+
+@app.post("/api/drivers/heartbeat")
+async def get_drivers_heartbeat(data: HeartbeatInput):
+    """
+        Recieves a heartbeat ping from the cliend and updates the lastActiveTime
+    """
+    try:
+        now_utc = datetime.now(timezone.utc)
+        ref = db.reference(f"drivers/{data.uid}")
+        ref.update({
+            "lastActiveAt": now_utc.isoformat(),
+            "loggedIn": True
+        })
+        
+        return {"message" : f"Heartbeat recieved from user {data.uid}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to process heartbeat")
+    
+async def db_set_inactive_users(user_type: Literal["users", "drivers"], stale_time: datetime) -> int:
+    """
+    Finds and logs out users/drivers whose lastActiveAt is before stale_time 
+    Returns the number of records modified 
+    """
+    
+    try:
+        ref = db.reference(user_type)
+        data: Dict[str, Any] = ref.get()
+        if not data: return 0
+        
+        mod_cnt = 0
+        updates = {}
+        
+        for uid, user_data in data.items():
+            if user_data.get("loggedIn") is True:
+                last_active_str = user_data.get("lastActiveAt")
+                if not last_active_str:
+                    updates[f"{uid}/loggedIn"] = False 
+                    mod_cnt += 1
+                    continue
+                try: 
+                    last_active_time = datetime.fromisoformat(last_active_str)
+                    
+                    if last_active_time < stale_time:
+                        updates[f"{uid}/loggedIn"] = False
+                        mod_cnt += 1
+                except ValueError:
+                    print(f"Warning: Malformed timestamp for {uid} in {user_type}: {last_active_str}")
+                    updates[f"{uid}/loggedIn"] = False
+                    mod_cnt += 1
+        
+        if updates: 
+            ref.update(updates)
+        
+        return mod_cnt
+                
+    
+    except Exception as e:
+        print(f"Database Cleanup Error for {user_type}: {e}")
+        return 0
+
+async def run_cleaup_job_loop():
+    """"Main background loop to run the cleanup job periodcially"""
+    await asyncio.sleep(5)
+    print("Background clean loop starting")
+    
+    while True:
+        try: 
+            stale_time = datetime.now(timezone.utc) - timedelta(seconds = LOGOUT_THRESHOLD_INTERVALS)
+            
+            riders_logged_out = await db_set_inactive_users("users", stale_time)
+            drivers_logged_out = await db_set_inactive_users("drivers", stale_time)
+            
+            current_time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+        except Exception as e:
+            print(f"CRITICAL: Cleanup job loop failed: {e}")
+            
+        await asyncio.sleep(CLEANUP_INTERVAL_SECONDS)
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(run_cleaup_job_loop())
+    print("Cleanup background task scheduled.")
 
 @app.get("/api/horses/{lat}/{lon}/{range}")
 async def get_horses_in_range(lat: float, lon: float, range: int) -> List[Dict[str, Any]]:
@@ -123,6 +235,7 @@ async def get_drivers_in_range(lat: float, lon: float, range: int) -> List[Dict[
 
     except Exception:
         raise HTTPException(status_code=500, detail="Internal server error fetching drivers.")
+
 
 
 @app.get("/")
