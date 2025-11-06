@@ -110,7 +110,7 @@ const loginWithGoogle = async () => {
           uid: user.uid,
           email: user.email,
           location: location,
-          loggedIn: false
+          loggedIn: true
         }),
       })
     }

@@ -44,14 +44,14 @@ class UserData(BaseModel):
     email: str
     location: List[float] 
     loggedIn : bool
-    lastActiveAt : datetime 
+    lastActiveAt : datetime | None = None
 
 class DriverData(BaseModel):
     uid: str
     email: str
     location: List[float] 
     loggedIn : bool
-    lastActiveAt : datetime
+    lastActiveAt : datetime | None = None
 
 class HeartbeatInput(BaseModel):
     uid: str
@@ -136,10 +136,6 @@ async def get_drivers_heartbeat(data: HeartbeatInput):
         raise HTTPException(status_code=500, detail="Failed to process heartbeat")
     
 async def db_set_inactive_users(user_type: Literal["users", "drivers"], stale_time: datetime) -> int:
-    """
-    Finds and logs out users/drivers whose lastActiveAt is before stale_time 
-    Returns the number of records modified 
-    """
     
     try:
         ref = db.reference(user_type)
@@ -158,6 +154,11 @@ async def db_set_inactive_users(user_type: Literal["users", "drivers"], stale_ti
                     continue
                 try: 
                     last_active_time = datetime.fromisoformat(last_active_str)
+                    
+                    if last_active_time.tzinfo is None:
+                        last_active_time = last_active_time.replace(tzinfo=timezone.utc)
+                    else:
+                        last_active_time = last_active_time.astimezone(timezone.utc)
                     
                     if last_active_time < stale_time:
                         updates[f"{uid}/loggedIn"] = False
