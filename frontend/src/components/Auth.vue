@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center justify-center min-h-screen bg-gray-50">
-    <div class="bg-white shadow-xl rounded-2xl p-8 w-80 text-center">
+    <div v-if="!userStore.loggedIn" class="bg-white shadow-xl rounded-2xl p-8 w-80 text-center">
       <h1 class="text-2xl font-bold mb-6">Login</h1>
 
       <button @click="loginWithGoogle"
@@ -21,23 +21,19 @@
         </label>
       </div>
 
-      <!-- --<p class="selected-role">Selected role: {{ role }}</p>-->
-      <!-- 
+      <p v-if="loginError" class="mt-4 text-red-600 text-sm">
+        {{ loginError }}
+      </p>
+    </div>
 
-      <p v-if="userStore.loggedIn" class="mt-6 text-gray-600 text-sm">
-        Logged in as:
-        <span class="font-semibold">{{ userStore.email }}</span>
-        <span class="text-gray-500"> ({{ userStore.role }})</span>
-      </p> -->
-      <!-- Beautiful logged-in card -->
-      <div v-if="userStore.loggedIn" class="login-info" role="status" aria-live="polite">
+    <div v-else class="bg-white shadow-xl rounded-2xl p-8 w-80 text-center">
+      <h1 class="text-2xl font-bold mb-6">User Profile</h1>
+      <div class="login-info" role="status" aria-live="polite">
         <div class="login-card">
-          <!-- small circular avatar with initial -->
           <div class="avatar" aria-hidden="true">
             {{ userStore.email ? userStore.email.charAt(0).toUpperCase() : "?" }}
           </div>
 
-          <!-- text column -->
           <div class="login-meta">
             <div class="login-line">
               <span class="label">Logged in as</span>
@@ -53,10 +49,6 @@
           </div>
         </div>
       </div>
-
-      <p v-if="loginError" class="mt-4 text-red-600 text-sm">
-        {{ loginError }}
-      </p>
     </div>
   </div>
 </template>
@@ -68,6 +60,7 @@ import { auth } from "../firebase"
 import { userStore, startWatchingLocation } from "../stores/userStores.js"
 import { useUserLocation } from '../composables/useUserLocation.js'
 import { startHeartbeat } from "../composables/heartbeat.js"
+
 const loginError = ref(null)
 const role = ref("Rider")
 const API_URL = import.meta.env.VITE_API_URL
@@ -86,23 +79,25 @@ const loginWithGoogle = async () => {
     const { locationError, getUserLocationAsync } = useUserLocation()
     const location = await getUserLocationAsync()
 
-    // MODIFIED: Check for a location error and show it to the user
+    // MCheck for a location error and show it to the user
     if (locationError.value) {
       loginError.value = locationError.value
     }
-    if (role.value == "Rider") {
+    
+    // API call logic based on selected role
+    if (role.value === "Rider") {
       await fetch(`${API_URL}/api/users`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           uid: user.uid,
           email: user.email,
-          location: location, // Send the initial [lat, lon]
+          location: location, // send the initial [lat, lon]
           loggedIn: true
         }),
       })
     }
-    else if (role.value == "Carriage Driver") {
+    else if (role.value === "Carriage Driver") {
       await fetch(`${API_URL}/api/drivers`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -114,14 +109,14 @@ const loginWithGoogle = async () => {
         }),
       })
     }
-    // Update the global store
+    
+    //update the global store
     userStore.uid = user.uid
     userStore.email = user.email
     userStore.location = location
     userStore.role = role.value
     userStore.loggedIn = true
 
-    // Start live location tracking after login is complete 
     startWatchingLocation()
 
     startHeartbeat()
