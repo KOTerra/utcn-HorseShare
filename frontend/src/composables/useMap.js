@@ -11,7 +11,7 @@ import {
   DEFAULT_LAT,
   DEFAULT_LON,
   DEFAULT_ZOOM
-} from '../composables/constants.js' 
+} from '../composables/constants.js'
 
 export function useMap(initialLat, initialLon, markerLayers) {
   const map = ref(null)
@@ -35,11 +35,11 @@ export function useMap(initialLat, initialLon, markerLayers) {
 
   const setupRoutingAndSearch = (mapInstance, userMarkerRef) => {
     const geocoder = L.Control.geocoder({
-        defaultMarkGeocode: false,
-        collapsed: false,
-        placeholder: 'Search location...'
-      })
-      .on('markgeocode', function(e) {
+      defaultMarkGeocode: false,
+      collapsed: false,
+      placeholder: 'Search location...'
+    })
+      .on('markgeocode', function (e) {
         const destLatLng = e.geocode.center;
         const userMarker = userMarkerRef.value;
 
@@ -48,10 +48,22 @@ export function useMap(initialLat, initialLon, markerLayers) {
         if (userMarker) {
           routingControl = L.Routing.control({
             waypoints: [
-              userMarker.getLatLng(),
-              destLatLng
+              userMarker.getLatLng(), // Start
+              destLatLng              // End
             ],
-            routeWhileDragging: true
+            routeWhileDragging: true,
+
+            createMarker: function (i, waypoint, n) {
+              // return null to hide the default routing marker here.
+              if (i === 0) {
+                return null;
+              }
+
+              return L.marker(waypoint.latLng, {
+                draggable: true,
+                title: "Destination"
+              });
+            }
           }).addTo(mapInstance);
         }
 
@@ -65,7 +77,7 @@ export function useMap(initialLat, initialLon, markerLayers) {
   }
 
   onMounted(() => {
-    // Leaflet requires a timeout to correctly calculate size when used within a framework like Vue
+    // Leaflet requires a timeout to correctly calculate size 
     setTimeout(() => {
       if (map.value) map.value.invalidateSize();
     }, 100);
