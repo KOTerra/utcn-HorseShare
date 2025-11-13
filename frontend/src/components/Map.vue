@@ -1,12 +1,9 @@
 <script setup>
-import { onMounted, ref, computed, watch } from 'vue'
-// Changed: Use relative path for userStore
+import { onMounted, ref, computed, watch, nextTick } from 'vue'
 import { userStore } from "../stores/userStores.js" 
-// Changed: Use relative paths for composables
 import { useMap } from '../composables/useMap.js'
 import { useMarkers } from '../composables/useMarkers.js'
 import { useApi } from '../composables/useApi.js'
-// Changed: Use relative path for constants
 import {
   DEFAULT_LAT,
   DEFAULT_LON,
@@ -77,6 +74,9 @@ watch(
 
 // --- Initialization ---
 onMounted(async () => {
+  // Wait for DOM to be fully rendered
+  await nextTick();
+  
   let initialLat = DEFAULT_LAT;
   let initialLon = DEFAULT_LON;
 
@@ -84,26 +84,40 @@ onMounted(async () => {
     [initialLat, initialLon] = userStore.location;
   }
 
-  const mapInstance = initializeMap(initialLat, initialLon, DEFAULT_ZOOM);
+  try {
+    const mapInstance = initializeMap(initialLat, initialLon, DEFAULT_ZOOM);
+    
+    // Give Leaflet time to render
+    await nextTick();
+    
+    setupRoutingAndSearch(mapInstance, userMarker);
 
-  setupRoutingAndSearch(mapInstance, userMarker);
+    const success = await fetchAndDisplayHorses(initialLat, initialLon, DEFAULT_RANGE);
+    if (success) lastFetchCenter.value = { lat: initialLat, lon: initialLon };
 
-  const success = await fetchAndDisplayHorses(initialLat, initialLon, DEFAULT_RANGE);
-  if (success) lastFetchCenter.value = { lat: initialLat, lon: initialLon };
-
-  if (userStore.loggedIn && userStore.location) {
-    updateUserMarker(mapInstance, initialLat, initialLon);
+    if (userStore.loggedIn && userStore.location) {
+      updateUserMarker(mapInstance, initialLat, initialLon);
+    }
+  } catch (error) {
+    console.error('Map initialization failed:', error);
   }
 })
 // ----------------------
 </script>
 
 <template>
-  <div id="map" class="w-full h-[500px] rounded-2xl shadow-lg"></div>
+  <div id="map"></div>
 </template>
 
-<style>
+<style scoped>
+/* Keep map layout local so it always fills the viewport and won't be accidentally
+   overridden by other global styles. This places the map behind overlays. */
 #map {
-  height: 500px;
+  position: fixed;
+  inset: 0;          /* top:0; right:0; bottom:0; left:0 */
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  background-color: #eef2f7; /* light background while tiles load */
 }
 </style>
