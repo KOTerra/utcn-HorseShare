@@ -3,21 +3,18 @@
     <h1 class="text-2xl font-bold mb-6">Login</h1>
 
     <button @click="loginWithGoogle"
-      class="flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg w-full transition">
+      class="google-login-btn flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg w-full transition mb-4">
       <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-5 h-5" />
       Login with Google
     </button>
 
-    <div class="role-toggle">
-      <label :class="['role-btn', role === 'Rider' ? 'active' : '']">
-        <input type="radio" name="role" value="Rider" v-model="role" />
-        Rider
-      </label>
+    <div class="role-selector"> <button class="role-btn" :class="{ active: role === 'Rider' }" @click="role = 'Rider'">
+        Rider 🚶
+      </button>
 
-      <label :class="['role-btn', role === 'Carriage Driver' ? 'active' : '']">
-        <input type="radio" name="role" value="Carriage Driver" v-model="role" />
-        Carriage Driver
-      </label>
+      <button class="role-btn" :class="{ active: role === 'Carriage Driver' }" @click="role = 'Carriage Driver'">
+        Carriage Driver 🎠🚋
+      </button>
     </div>
 
     <p v-if="loginError" class="mt-4 text-red-600 text-sm">
@@ -79,7 +76,7 @@ const loginWithGoogle = async () => {
     if (locationError.value) {
       loginError.value = locationError.value
     }
-    
+
     // API call logic based on selected role
     if (role.value === "Rider") {
       await fetch(`${API_URL}/api/users`, {
@@ -105,7 +102,7 @@ const loginWithGoogle = async () => {
         }),
       })
     }
-    
+
     //update the global store
     userStore.uid = user.uid
     userStore.email = user.email
@@ -126,71 +123,164 @@ const loginWithGoogle = async () => {
 </script>
 
 <style scoped>
-
+/* === General Auth Card Styles === */
 .auth-card {
   backdrop-filter: blur(8px);
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  border-radius: 0.75rem;  
-  padding: 1.5rem;         
-  width: 20rem;            
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  width: 20rem;
   text-align: center;
 }
 
-
 .auth-card h1 {
   color: white;
-  margin-bottom: 1.125rem;  
-  font-size: 1.125rem;    
-}
-
-.p-8 { padding: 1.5rem; }   
-.w-80 { width: 20rem; }     
-
-.role-toggle {
-  display: flex;
-  justify-content: center;
-  gap: 0.75rem;             
-  margin-bottom: 0.75rem;   
-  margin-top: 0.75rem;      
+  margin-bottom: 1.125rem;
+  font-size: 1.125rem;
 }
 
 .auth-card p {
   color: #ff6b6b;
 }
 
-body {
-  font-family: "Inter", sans-serif;
+/* === Google Login Button === */
+.google-login-btn {
+  margin-bottom: 1.5rem;
 }
 
-.bg-white {
-  backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.95) !important;
+
+/* === Role Selector (Styled like RideSelector buttons) === */
+.role-selector {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px;
+  border-radius: 999px;
+  justify-content: center;
+  margin-top: 0.75rem;
 }
 
-.shadow-xl {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+.role-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  /* Pill shape */
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  /* For emojis/icons */
+  white-space: nowrap;
+  /* Prevent text wrapping */
 }
 
-.rounded-2xl {
-  border-radius: 1rem;
+.role-btn:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.p-8 {
-  padding: 2rem;
+.role-btn.active {
+  background: rgb(117, 202, 185);
+  /* Active background color */
+  color: #1a1a1a;
+  /* Active text color */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.w-80 {
-  width: 20rem;
+@media (max-width: 640px) {
+  .role-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+  }
 }
 
-.text-center {
-  text-align: center;
+/* === User Profile Specific Styles === */
+.login-info {
+  margin-top: 1rem;
+  color: white;
+}
+
+.login-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: rgb(117, 202, 185);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1a1a1a;
+}
+
+.login-meta {
+  flex-grow: 1;
+}
+
+.login-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.login-line.small {
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+.label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.login-email {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+}
+
+.role-badge {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.role-badge.rider {
+  background-color: #6daee3;
+  color: rgb(189, 84, 53);
+}
+
+.role-badge.driver {
+  background-color: #75cab9;
+  color: #1a1a1a;
 }
 
 .text-2xl {
   font-size: 1.5rem;
+}
+
+.font-bold {
   font-weight: 700;
 }
 
@@ -198,15 +288,79 @@ body {
   margin-bottom: 1.5rem;
 }
 
-.role-toggle {
+.flex {
   display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
   justify-content: center;
-  gap: 0.75rem;             
-  margin-bottom: 0.75rem;   
-  margin-top: 0.75rem;      
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.bg-blue-600 {
+  background-color: rgb(157, 69, 44);
+}
+
+.hover\:bg-blue-700:hover {
+  background-color: rgb(130, 55, 37);
+}
+
+.text-white {
+  color: rgb(255, 255, 255);
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.transition {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.w-5 {
+  width: 1.25rem;
+}
+
+.h-5 {
+  height: 1.25rem;
 }
 
 .mt-4 {
   margin-top: 1rem;
+}
+
+.text-red-600 {
+  color: #dc2626;
+}
+
+.text-sm {
+  font-size: 0.875rem;
 }
 </style>
