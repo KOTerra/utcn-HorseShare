@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref, computed, watch, nextTick } from 'vue'
-import { userStore } from "../stores/userStores.js" 
+import { userStore } from "../stores/userStores.js"
 import { useMap } from '../composables/useMap.js'
 import { useMarkers } from '../composables/useMarkers.js'
 import { useApi } from '../composables/useApi.js'
@@ -59,11 +59,13 @@ watch(
       );
 
       if (distance > FETCH_TRIGGER_DISTANCE) {
-        let success = await fetchAndDisplayHorses(newLat, newLon, DEFAULT_RANGE) &&
-                      await fetchAndDisplayCarriages(newLat, newLon, DEFAULT_RANGE);
+        if (userStore.role == "Rider") {
+          let success = await fetchAndDisplayHorses(newLat, newLon, DEFAULT_RANGE)
+            && await fetchAndDisplayCarriages(newLat, newLon, DEFAULT_RANGE);
 
-        if (success) lastFetchCenter.value = { lat: newLat, lon: newLon };
-        map.value.setView([newLat, newLon], map.value.getZoom());
+          if (success) lastFetchCenter.value = { lat: newLat, lon: newLon };
+          map.value.setView([newLat, newLon], map.value.getZoom());
+        }
       }
     }
   },
@@ -76,7 +78,7 @@ watch(
 onMounted(async () => {
   // Wait for DOM to be fully rendered
   await nextTick();
-  
+
   let initialLat = DEFAULT_LAT;
   let initialLon = DEFAULT_LON;
 
@@ -86,15 +88,11 @@ onMounted(async () => {
 
   try {
     const mapInstance = initializeMap(initialLat, initialLon, DEFAULT_ZOOM);
-    
+
     // Give Leaflet time to render
     await nextTick();
-    
+
     setupRoutingAndSearch(mapInstance, userMarker);
-
-    const success = await fetchAndDisplayHorses(initialLat, initialLon, DEFAULT_RANGE);
-    if (success) lastFetchCenter.value = { lat: initialLat, lon: initialLon };
-
     if (userStore.loggedIn && userStore.location) {
       updateUserMarker(mapInstance, initialLat, initialLon);
     }
@@ -114,10 +112,12 @@ onMounted(async () => {
    overridden by other global styles. This places the map behind overlays. */
 #map {
   position: fixed;
-  inset: 0;          /* top:0; right:0; bottom:0; left:0 */
+  inset: 0;
+  /* top:0; right:0; bottom:0; left:0 */
   width: 100%;
   height: 100%;
   z-index: 0;
-  background-color: #eef2f7; /* light background while tiles load */
+  background-color: #eef2f7;
+  /* light background while tiles load */
 }
 </style>
