@@ -26,7 +26,8 @@ const {
   carriageMarkers,
   addHorseMarkersToMap,
   addCarriagesMarkersToMap,
-  updateUserMarker
+  updateUserMarker,
+  clearAllMarkers
 } = useMarkers(userStore)
 
 const {
@@ -60,19 +61,53 @@ watch(
 
       if (distance > FETCH_TRIGGER_DISTANCE) {
         if (userStore.role == "Rider") {
-          let success = await fetchAndDisplayHorses(newLat, newLon, DEFAULT_RANGE)
-            && await fetchAndDisplayCarriages(newLat, newLon, DEFAULT_RANGE);
-
-          if (success) lastFetchCenter.value = { lat: newLat, lon: newLon };
-          map.value.setView([newLat, newLon], map.value.getZoom());
+          if (userStore.selectedRideType == "horse") {
+            let success = await fetchAndDisplayHorses(newLat, newLon, DEFAULT_RANGE)
+            if (success) lastFetchCenter.value = { lat: newLat, lon: newLon };
+            map.value.setView([newLat, newLon], map.value.getZoom());
+          }
+          else if(userStore.selectedRideType == "carriage")
+          {
+            let success = await fetchAndDisplayCarriages(newLat, newLon, DEFAULT_RANGE);
+            if(success) lastFetchCenter.value = {lat: newLat, lon: newLon};
+            map.value.setView([newLat, newLon], map.value.getZoom());
+          }
         }
       }
     }
   },
   { deep: true }
 )
-// ---------------------------------------------
 
+
+// --- Ride Type Change Logic ---
+watch(
+  () => userStore.selectedRideType,
+  async (newRideType, oldRideType) => {
+    if (isLoggedIn.value && map.value && userStore.role === 'Rider' && newRideType !== oldRideType) {
+      
+      const [currentLat, currentLon] = userStore.location;
+
+      clearAllMarkers(); 
+
+      let success = false;
+      
+      if (newRideType === "horse") {
+        success = await fetchAndDisplayHorses(currentLat, currentLon, DEFAULT_RANGE);
+      } 
+      else if (newRideType === "carriage") {
+        success = await fetchAndDisplayCarriages(currentLat, currentLon, DEFAULT_RANGE);
+      }
+      
+      if (success) {
+        lastFetchCenter.value = { lat: currentLat, lon: currentLon };
+      }
+      
+      map.value.setView([currentLat, currentLon], map.value.getZoom());
+    }
+  }
+);
+// -------------
 
 // --- Initialization ---
 onMounted(async () => {

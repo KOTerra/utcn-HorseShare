@@ -7,6 +7,7 @@ export const userStore = reactive({
   location: [46.77, 23.59], // default Cluj-Napoca
   loggedIn: false,
   locationError: null,
+  selectedRideType: null //NULL for carriage drivers, Horse/Carriage for normal users
 })
 
 let watchId = null

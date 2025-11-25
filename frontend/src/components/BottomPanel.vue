@@ -9,6 +9,7 @@ import WaitingForOrders from './bottom-panels/WaitingForOrders.vue'
 
 const handleRideSelection = (type) => {
   console.log('User selected ride type:', type)
+  userStore.selectedRideType = type
   // You can add logic here to update the map markers or calculate prices
 }
 </script>

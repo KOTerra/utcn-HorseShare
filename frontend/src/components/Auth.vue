@@ -109,7 +109,12 @@ const loginWithGoogle = async () => {
     userStore.location = location
     userStore.role = role.value
     userStore.loggedIn = true
-
+    if(role.value == "Carriage Driver"){
+      userStore.selectedRideType = "none" 
+    }
+    else{
+      userStore.selectedRideType = "horse";
+    }
     startWatchingLocation()
 
     startHeartbeat()

@@ -75,6 +75,12 @@ export function useMarkers(userStore) {
     }
   }
 
+  const clearAllMarkers = () => {
+    //console.log('Clearing all markers.');
+    horseMarkers.clearLayers();
+    carriageMarkers.clearLayers();
+  }
+
   return {
     userMarker,
     horseMarkers,
@@ -82,5 +88,6 @@ export function useMarkers(userStore) {
     addHorseMarkersToMap,
     addCarriagesMarkersToMap,
     updateUserMarker,
+    clearAllMarkers
   }
 }
