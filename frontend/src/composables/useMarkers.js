@@ -2,8 +2,8 @@
 
 import { ref, computed } from 'vue'
 import L from 'leaflet'
-import horseIconUrl from '../assets/horseIcon.png' 
-import carriageIconUrl from '../assets/horseCarriageIcon.png' 
+import horseIconUrl from '../assets/horseIcon.png'
+import carriageIconUrl from '../assets/horseCarriageIcon.png'
 
 // --- Marker Icons ---
 const horseIcon = L.icon({
@@ -13,7 +13,7 @@ const horseIcon = L.icon({
   popupAnchor: [0, -30]
 })
 
-export const carriageIcon = L.icon({ 
+export const carriageIcon = L.icon({
   iconUrl: carriageIconUrl,
   iconSize: [60, 60],
   iconAnchor: [30, 60],
@@ -31,10 +31,12 @@ export function useMarkers(userStore) {
     horseMarkers.clearLayers();
 
     horses.forEach(horse => {
-      const [lat, lon] = horse.location;
-      L.marker([lat, lon], { icon: horseIcon })
-        .addTo(horseMarkers)
-        .bindPopup(`Horse ID: ${horse.id || 'N/A'}<br>Name: ${horse.name || 'Unknown'}`);
+      if (horse.location) {
+        const [lat, lon] = horse.location;
+        L.marker([lat, lon], { icon: horseIcon })
+          .addTo(horseMarkers)
+          .bindPopup(`Horse ID: ${horse.id || 'N/A'}<br>Name: ${horse.name || 'Unknown'}`);
+      }
     });
   }
 
@@ -42,10 +44,12 @@ export function useMarkers(userStore) {
     carriageMarkers.clearLayers();
 
     drivers.forEach(driver => {
-      const [lat, lon] = driver.location;
-      L.marker([lat, lon], { icon: carriageIcon })
-        .addTo(carriageMarkers)
-        .bindPopup(`Driver ID: ${driver.id || 'N/A'}<br>Name: ${driver.name || 'Unknown'}`);
+      if (driver.location) {
+        const [lat, lon] = driver.location;
+        L.marker([lat, lon], { icon: carriageIcon })
+          .addTo(carriageMarkers)
+          .bindPopup(`Driver ID: ${driver.id || 'N/A'}<br>Name: ${driver.name || 'Unknown'}`);
+      }
     });
   }
 
@@ -54,7 +58,6 @@ export function useMarkers(userStore) {
     const userRole = userStore.role;
 
     if (!userMarker.value) {
-      // Create user marker if it doesn't exist
       if (userRole === "Rider") {
         userMarker.value = L.marker(newLatLng).addTo(mapInstance);
       } else if (userRole === "Carriage Driver") {
@@ -63,20 +66,17 @@ export function useMarkers(userStore) {
     }
 
     if (userMarker.value) {
-      // Update marker location and initial view/popup
       userMarker.value.setLatLng(newLatLng);
 
       if (firstLocationUpdate.value) {
         mapInstance.setView(newLatLng, 15);
         userMarker.value.setPopupContent('Hello from Horse Share 🐴📍');
-        userMarker.value.openPopup();
         firstLocationUpdate.value = false;
       }
     }
   }
 
   const clearAllMarkers = () => {
-    //console.log('Clearing all markers.');
     horseMarkers.clearLayers();
     carriageMarkers.clearLayers();
   }

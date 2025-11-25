@@ -5,7 +5,7 @@ from datetime import datetime
 from datetime import timezone
 import firebase_admin
 from firebase_admin import credentials, db
-from typing import List, Dict, Any # <-- Removed Tuple, added List
+from typing import List, Dict, Any, Optional 
 from horse_utils import generate_horses, process_horse_data
 from driver_utils import compute_drivers_in_range
 from starlette.responses import Response
@@ -38,13 +38,13 @@ async def add_security_headers(request: Request, call_next):
     return response
 
 
-
 class UserData(BaseModel):
     uid: str
     email: str
     location: List[float] 
     loggedIn : bool
     lastActiveAt : datetime | None = None
+    role: Optional[str] = "Rider" 
 
 class DriverData(BaseModel):
     uid: str
@@ -58,7 +58,7 @@ class HeartbeatInput(BaseModel):
 
 @app.get("/api/hello")
 async def hello():
-    return {"message": "Hello from FastAPI!"}
+    return {"message": "Welcome to HorseShare! 🐴"}
 
 
 @app.get("/api/bye")
@@ -70,10 +70,14 @@ async def bye():
 async def save_user(user: UserData):
     try:
         ref = db.reference(f"users/{user.uid}")
-        ref.set({"email": user.email,
-                 "location": user.location,
-                  "loggedIn": user.loggedIn})
-        return {"message": f"User  {user.uid} email saved successfully"}
+        ref.set({
+            "email": user.email,
+            "location": user.location,
+            "loggedIn": user.loggedIn,
+            "role": user.role,
+            "lastActiveAt": user.lastActiveAt.isoformat() if user.lastActiveAt else None
+        })
+        return {"message": f"User {user.uid} saved successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -82,10 +86,17 @@ async def save_user(user: UserData):
 async def save_driver(driver: DriverData):
     try:
         ref = db.reference(f"drivers/{driver.uid}")
-        ref.set({"email": driver.email,
-                 "location": driver.location,
-                 "loggedIn" : driver.loggedIn})
-        return {"message": f"User  {driver.uid} email saved successfully"}
+        
+        name = driver.email.split('@')[0]
+
+        ref.set({
+            "email": driver.email,
+            "location": driver.location,
+            "loggedIn" : driver.loggedIn,
+            "lastActiveAt": driver.lastActiveAt.isoformat() if driver.lastActiveAt else None,
+            "name": name
+        })
+        return {"message": f"Driver {driver.uid} saved successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

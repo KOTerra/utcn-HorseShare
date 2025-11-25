@@ -1,91 +1,79 @@
-// src/composables/useMap.js
-
-import { ref, watch, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 import 'leaflet-routing-machine'
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
 import 'leaflet-control-geocoder'
-import {
-  DEFAULT_LAT,
-  DEFAULT_LON,
-  DEFAULT_ZOOM
-} from '../composables/constants.js'
 
 export function useMap(initialLat, initialLon, markerLayers) {
   const map = ref(null)
-  let routingControl = null;
+  let routingControl = null
 
   const initializeMap = (lat, lon, zoom) => {
     const mapInstance = L.map('map').setView([lat, lon], zoom)
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(mapInstance)
 
-    // Add marker layers (horse, carriage) to the map
-    markerLayers.forEach(layer => layer.addTo(mapInstance));
+    if (markerLayers) {
+      markerLayers.forEach(layer => layer.addTo(mapInstance))
+    }
 
     map.value = mapInstance
     return mapInstance
   }
 
-  const setupRoutingAndSearch = (mapInstance, userMarkerRef) => {
-    const geocoder = L.Control.geocoder({
+  const clearRoute = () => {
+    if (routingControl && map.value) {
+      map.value.removeControl(routingControl)
+      routingControl = null
+    }
+  }
+
+  const setupRoutingAndSearch = (mapInstance, userMarkerRef, onDestinationSelected) => {
+    L.Control.geocoder({
       defaultMarkGeocode: false,
-      collapsed: false,
-      placeholder: 'Search location...'
+      placeholder: "Search destination…"
     })
-      .on('markgeocode', function (e) {
-        const destLatLng = e.geocode.center;
-        const userMarker = userMarkerRef.value;
+      .on("markgeocode", e => {
+        const dest = e.geocode.center
 
-        if (routingControl) mapInstance.removeControl(routingControl);
-
-        if (userMarker) {
-          routingControl = L.Routing.control({
-            waypoints: [
-              userMarker.getLatLng(), // Start
-              destLatLng              // End
-            ],
-            routeWhileDragging: true,
-
-            createMarker: function (i, waypoint, n) {
-              // return null to hide the default routing marker here.
-              if (i === 0) {
-                return null;
-              }
-
-              return L.marker(waypoint.latLng, {
-                draggable: true,
-                title: "Destination"
-              });
-            }
-          }).addTo(mapInstance);
+        if (onDestinationSelected) {
+          const shouldProceed = onDestinationSelected({ lat: dest.lat, lng: dest.lng })
+          if (shouldProceed === false) return
         }
 
-        if (userMarker) {
-          mapInstance.fitBounds(L.latLngBounds([userMarker.getLatLng(), destLatLng]));
-        } else {
-          mapInstance.setView(destLatLng, 13);
-        }
+        if (routingControl) mapInstance.removeControl(routingControl)
+
+        const userLatLng = userMarkerRef.value ? userMarkerRef.value.getLatLng() : mapInstance.getCenter()
+
+        routingControl = L.Routing.control({
+          waypoints: [userLatLng, dest],
+          routeWhileDragging: true,
+          createMarker: (i, waypoint, n) => {
+            if (i === 0) return null
+            return L.marker(waypoint.latLng, { draggable: true })
+          }
+        }).addTo(mapInstance)
+
+        mapInstance.fitBounds(L.latLngBounds([userLatLng, dest]))
       })
-      .addTo(mapInstance);
+      .addTo(mapInstance)
   }
 
   onMounted(() => {
-    // Leaflet requires a timeout to correctly calculate size 
     setTimeout(() => {
-      if (map.value) map.value.invalidateSize();
-    }, 100);
-  });
+      if (map.value) map.value.invalidateSize()
+    }, 120)
+  })
 
   return {
     map,
     initializeMap,
     setupRoutingAndSearch,
+    clearRoute
   }
 }

@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 
 const API_URL = import.meta.env.VITE_API_URL
-const message = ref('HorseShare 🐴')
+const message = ref('Loading... 🐴')
 
 onMounted(async () => {
   try {

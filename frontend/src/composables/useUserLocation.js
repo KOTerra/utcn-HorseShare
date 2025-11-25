@@ -8,9 +8,6 @@ export function useUserLocation() {
   const getUserLocationAsync = () => {
     locationError.value = null // Clear previous errors
 
-    // I've removed `loginError.value = null`.
-    // This composable should only worry about location.
-    // The component using it can be responsible for clearing login errors.
 
     return new Promise((resolve) => {
       if ('geolocation' in navigator) {

@@ -3,11 +3,15 @@ import { reactive } from 'vue'
 export const userStore = reactive({
   uid: null,
   email: null,
-  role: null,
+  role: null, // Rider or Carriage Driver
   location: [46.77, 23.59], // default Cluj-Napoca
   loggedIn: false,
   locationError: null,
-  selectedRideType: null //NULL for carriage drivers, Horse/Carriage for normal users
+  selectedRideType: 'horse', // Default to horse
+  
+  rideState: 'idle', 
+  destination: null, // { lat, lng }
+  nearbyDrivers: []
 })
 
 let watchId = null
@@ -15,7 +19,7 @@ let lastDbUpdateTime = 0
 let lastDbLocation = null   
 
 const API_URL = import.meta.env.VITE_API_URL
-const UPDATE_INTERVAL_MS = 30000        //30 sec, 30 meters 
+const UPDATE_INTERVAL_MS = 30000      //30 sec, 30 meters   
 const UPDATE_DISTANCE_METERS = 30
 
 
@@ -24,7 +28,6 @@ export function startWatchingLocation() {
     userStore.locationError = null
 
     watchId = navigator.geolocation.watchPosition(
-      // Success callback (fires frequently)
       async (position) => {
         const { latitude, longitude } = position.coords
         const now = Date.now()
@@ -40,31 +43,40 @@ export function startWatchingLocation() {
           )
         }
 
-        // --- Throttle Logic ---
-        // Update db if:
-        // - It's the very first update (!lastDbLocation)
-        // - 30 seconds passed      
-        // - moved 30 meters
         const shouldUpdateDb = !lastDbLocation || 
                                 timeElapsedMs > UPDATE_INTERVAL_MS || 
                                 distanceMovedM > UPDATE_DISTANCE_METERS
 
         if (shouldUpdateDb && userStore.uid) {
-          console.log(`DB Update Triggered. Reason: 
-            Time: ${timeElapsedMs > UPDATE_INTERVAL_MS}, 
-            Distance: ${distanceMovedM > UPDATE_DISTANCE_METERS}, 
-            First: ${!lastDbLocation}`);
-
           try {
-            await fetch(`${API_URL}/api/users`, {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
+            const isDriver = userStore.role === 'Carriage Driver'
+            const endpoint = isDriver ? '/api/drivers' : '/api/users'
+
+            const payload = {
                 uid: userStore.uid,
                 email: userStore.email,
                 location: [latitude, longitude],
-              }),
+                loggedIn: true,
+                lastActiveAt: new Date().toISOString()
+            }
+            
+            if (!isDriver) {
+                payload.role = userStore.role || 'Rider'
+            }
+
+            console.log(`Syncing location to ${endpoint}:`, payload)
+
+            const response = await fetch(`${API_URL}${endpoint}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
             })
+            
+            if (!response.ok) {
+                const err = await response.json()
+                console.error("Backend Validation Error:", err)
+                return
+            }
             
             lastDbUpdateTime = now
             lastDbLocation = [latitude, longitude]
@@ -74,12 +86,10 @@ export function startWatchingLocation() {
           }
         }
       },
-      // Error callback
       (error) => {
         console.warn('Error watching location:', error.message)
         userStore.locationError = 'Unable to retrieve live location.'
       },
-      // Options
       {
         enableHighAccuracy: true,
         timeout: 10000,
@@ -101,7 +111,6 @@ export function stopWatchingLocation() {
     lastDbLocation = null
   }
 }
-
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const earthRadius = 6371e3 

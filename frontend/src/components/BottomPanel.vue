@@ -1,16 +1,47 @@
 <script setup>
 import logo from '../assets/logo.png'
 import { userStore } from '../stores/userStores.js'
+import { computed } from 'vue'
 
-// Import the sub-components
 import WelcomeMessage from './bottom-panels/WelcomeMessage.vue'
-import RideSelector from './bottom-panels/RideSelection.vue'
+import RideSelection from './bottom-panels/RIdeSelection.vue'
 import WaitingForOrders from './bottom-panels/WaitingForOrders.vue'
+import FindingDrivers from './bottom-panels/FindingDrivers.vue'
+import IncomingRequest from './bottom-panels/IncomingRequest.vue'
+
+const currentPanel = computed(() => {
+  if (!userStore.loggedIn) return 'welcome'
+
+  if (userStore.role === 'Rider') {
+    if (userStore.rideState === 'finding_drivers') return 'finding_drivers'
+    return 'ride_selector'
+  }
+
+  if (userStore.role === 'Carriage Driver') {
+    if (userStore.rideState === 'request_received') return 'incoming_request'
+    return 'waiting_orders'
+  }
+
+  return 'welcome'
+})
 
 const handleRideSelection = (type) => {
-  console.log('User selected ride type:', type)
   userStore.selectedRideType = type
-  // You can add logic here to update the map markers or calculate prices
+}
+
+const handleDriversFound = (drivers) => {
+  userStore.nearbyDrivers = drivers
+}
+
+const handleRequestRide = (driver) => {
+  const driverName = driver.name || "Carriage Driver"
+  console.log("Request sent to driver:", driverName)
+}
+
+//  Reset state on Back 
+const handleBack = () => {
+  userStore.rideState = 'idle'
+  userStore.nearbyDrivers = []
 }
 </script>
 
@@ -21,11 +52,18 @@ const handleRideSelection = (type) => {
 
     <div class="content-area">
 
-      <WelcomeMessage v-if="!userStore.loggedIn" />
+      <WelcomeMessage v-if="currentPanel === 'welcome'" />
 
-      <RideSelector v-else-if="userStore.role === 'Rider'" @ride-selected="handleRideSelection" />
+      <RideSelection v-else-if="currentPanel === 'ride_selector'" @ride-selected="handleRideSelection" />
 
-      <WaitingForOrders v-else-if="userStore.role === 'Carriage Driver'" />
+      <FindingDrivers v-else-if="currentPanel === 'finding_drivers'"
+        :coords="{ lat: userStore.location[0], lng: userStore.location[1] }" @drivers-loaded="handleDriversFound"
+        @request-ride="handleRequestRide" @back="handleBack" />
+
+      <WaitingForOrders v-else-if="currentPanel === 'waiting_orders'" />
+
+      <IncomingRequest v-else-if="currentPanel === 'incoming_request'" />
+
     </div>
 
   </div>
@@ -33,26 +71,20 @@ const handleRideSelection = (type) => {
 
 <style scoped>
 .bottom-panel {
-  /* Fixed Positioning */
   position: fixed;
   left: 24px;
   right: 24px;
   bottom: 24px;
   z-index: 60;
-
-  /* Glassmorphism */
   box-sizing: border-box;
   width: auto;
   min-height: 42px;
   padding: 0.675rem 0.75rem;
   border-radius: 0.5625rem;
-
   background: rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(8px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
   border: 1px solid rgba(255, 255, 255, 0.06);
-
-  /* Flex Layout */
   display: flex;
   align-items: center;
   justify-content: flex-start;

@@ -5,7 +5,9 @@ import { DEFAULT_RANGE } from '../composables/constants.js';
 const API_URL = import.meta.env.VITE_API_URL;
 
 function getDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371;
+  if(!lat1 || !lon1 || !lat2 || !lon2) return 99999;
+  
+  const R = 6371; // km
   const toRad = (dgr) => (dgr * Math.PI) / 180;
 
   const dLat = toRad(lat2 - lat1);
@@ -17,47 +19,40 @@ function getDistance(lat1, lon1, lat2, lon2) {
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(rLat1) * Math.cos(rLat2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+  return R * c * 1000; 
 }
 
 export function useApi(addHorseMarkers, addCarriagesMarkers) {
 
   const fetchAndDisplayHorses = async (lat, lon, range = DEFAULT_RANGE) => {
-    const baseURL = `${API_URL}/api/horses`;
-    const apiURL = `${baseURL}/${lat}/${lon}/${range}`;
+    const apiURL = `${API_URL}/api/horses/${lat}/${lon}/${range}`;
 
     try {
       const response = await fetch(apiURL);
-      const text = await response.text();
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}. Body: ${text.substring(0, 100)}...`);
-
-      let allHorses = [];
-      if (text.trim().length > 0) {
-        allHorses = JSON.parse(text);
-      }
-
-      addHorseMarkers(allHorses);
+      const data = await response.json();
+      addHorseMarkers(data);
       return true;
     } catch (error) {
-      console.error('There was a critical problem fetching horses:', error);
+      console.error('Error fetching horses:', error);
       return false;
     }
   }
 
   const fetchAndDisplayCarriages = async (lat, lon, range = DEFAULT_RANGE) => {
-    const baseURL = `${API_URL}/api/drivers`;
-    const apiURL = `${baseURL}/${lat}/${lon}/${range}`;
+    const apiURL = `${API_URL}/api/drivers/${lat}/${lon}/${range}`;
 
     try {
       const response = await fetch(apiURL);
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}. Body: ${await response.text().substring(0,100)}...`);
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
       const allDrivers = await response.json();
+      
       addCarriagesMarkers(allDrivers);
       return true;
     } catch (error) {
-      console.error('There was a critical problem fetching carriage drivers:', error);
+      console.error('Error fetching carriage drivers:', error);
       return false;
     }
   }

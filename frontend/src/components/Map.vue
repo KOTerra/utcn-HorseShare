@@ -1,133 +1,121 @@
 <script setup>
 import { onMounted, ref, computed, watch, nextTick } from 'vue'
+import L from 'leaflet'
+import 'leaflet-routing-machine'
 import { userStore } from "../stores/userStores.js"
 import { useMap } from '../composables/useMap.js'
 import { useMarkers } from '../composables/useMarkers.js'
 import { useApi } from '../composables/useApi.js'
-import {
-  DEFAULT_LAT,
-  DEFAULT_LON,
-  DEFAULT_ZOOM,
-  DEFAULT_RANGE,
-  FETCH_TRIGGER_DISTANCE
-} from '../composables/constants.js'
+import { DEFAULT_LAT, DEFAULT_LON, DEFAULT_ZOOM, DEFAULT_RANGE, FETCH_TRIGGER_DISTANCE } from '../composables/constants.js'
 
-// --- Store & State ---
 const isLoggedIn = computed(() => userStore.loggedIn)
-const userLocation = computed(() => userStore.location)
-
 const lastFetchCenter = ref({ lat: null, lon: null });
-// ---------------------
 
-// --- Composables ---
-const {
-  userMarker,
-  horseMarkers,
-  carriageMarkers,
-  addHorseMarkersToMap,
-  addCarriagesMarkersToMap,
-  updateUserMarker,
-  clearAllMarkers
-} = useMarkers(userStore)
+const { userMarker, horseMarkers, carriageMarkers, addHorseMarkersToMap, addCarriagesMarkersToMap, updateUserMarker, clearAllMarkers } = useMarkers(userStore)
+const { map, initializeMap, setupRoutingAndSearch, clearRoute } = useMap(null, null, [horseMarkers, carriageMarkers])
+const { fetchAndDisplayHorses, fetchAndDisplayCarriages, getDistance } = useApi(addHorseMarkersToMap, addCarriagesMarkersToMap)
 
-const {
-  map,
-  initializeMap,
-  setupRoutingAndSearch
-} = useMap(null, null, [horseMarkers, carriageMarkers])
+const onDestinationSelected = (destCoords) => {
+  if (userStore.role === 'Rider' && userStore.selectedRideType === 'carriage') {
+    userStore.destination = destCoords
+    userStore.rideState = 'finding_drivers'
+    return false
+  }
+  return true // default routing
+}
 
-const {
-  fetchAndDisplayHorses,
-  fetchAndDisplayCarriages,
-  getDistance
-} = useApi(addHorseMarkersToMap, addCarriagesMarkersToMap)
-// ---------------------
+// Watchers
+watch(() => userStore.nearbyDrivers, (drivers) => {
+  // Only draw route if we are in the correct state and have drivers
+  if (userStore.rideState === 'finding_drivers' && drivers.length > 0 && map.value) {
+    const driver = drivers[0]
 
+    let dLat, dLon;
+    if (Array.isArray(driver.location)) {
+      [dLat, dLon] = driver.location
+    } else {
+      dLat = driver.latitude || driver.lat
+      dLon = driver.longitude || driver.lon
+    }
 
-// --- Location Update & Data Fetching Logic ---
-watch(
-  () => userStore.location,
-  async (newLocation) => {
-    if (isLoggedIn.value && newLocation && map.value) {
-      const [newLat, newLon] = newLocation;
+    if (dLat && dLon) {
+      clearRoute()
 
-      updateUserMarker(map.value, newLat, newLon);
+      L.Routing.control({
+        waypoints: [
+          L.latLng(dLat, dLon),
+          L.latLng(userStore.location[0], userStore.location[1]) // User
+        ],
+        lineOptions: { styles: [{ color: '#75cab9', opacity: 0.8, weight: 6 }] },
+        createMarker: (i, wp) => i === 0 ? L.marker(wp.latLng, { icon: L.divIcon({ className: 'driver-start-icon', html: '🛒', iconSize: [24, 24] }) }) : null,
+        addWaypoints: false,
+        routeWhileDragging: false,
+        fitSelectedRoutes: true,
+        showAlternatives: false
+      }).addTo(map.value)
+    }
+  }
+})
 
-      // check if a new data fetch is needed (user moved far enough)
-      const distance = getDistance(
-        newLat, newLon,
-        lastFetchCenter.value.lat, lastFetchCenter.value.lon
-      );
+watch(() => userStore.rideState, (newState) => {
+  if (newState === 'idle') clearRoute()
+})
 
-      if (distance > FETCH_TRIGGER_DISTANCE) {
-        if (userStore.role == "Rider") {
-          if (userStore.selectedRideType == "horse") {
-            let success = await fetchAndDisplayHorses(newLat, newLon, DEFAULT_RANGE)
-            if (success) lastFetchCenter.value = { lat: newLat, lon: newLon };
-            map.value.setView([newLat, newLon], map.value.getZoom());
-          }
-          else if(userStore.selectedRideType == "carriage")
-          {
-            let success = await fetchAndDisplayCarriages(newLat, newLon, DEFAULT_RANGE);
-            if(success) lastFetchCenter.value = {lat: newLat, lon: newLon};
-            map.value.setView([newLat, newLon], map.value.getZoom());
-          }
+watch(() => userStore.location, async (newLocation) => {
+  if (isLoggedIn.value && newLocation && map.value) {
+    const [newLat, newLon] = newLocation;
+    updateUserMarker(map.value, newLat, newLon);
+
+    const distance = getDistance(newLat, newLon, lastFetchCenter.value.lat, lastFetchCenter.value.lon);
+
+    if (distance > FETCH_TRIGGER_DISTANCE || !lastFetchCenter.value.lat) {
+      if (userStore.role == "Rider") {
+        let success = false;
+        if (userStore.selectedRideType == "horse") {
+          success = await fetchAndDisplayHorses(newLat, newLon, DEFAULT_RANGE)
+        } else if (userStore.selectedRideType == "carriage") {
+          success = await fetchAndDisplayCarriages(newLat, newLon, DEFAULT_RANGE);
+        }
+
+        if (success) {
+          lastFetchCenter.value = { lat: newLat, lon: newLon };
         }
       }
     }
-  },
-  { deep: true }
-)
+  }
+}, { deep: true })
 
+watch(() => userStore.selectedRideType, async (newRideType) => {
+  if (isLoggedIn.value && map.value && userStore.role === 'Rider') {
+    const [currentLat, currentLon] = userStore.location;
 
-// --- Ride Type Change Logic ---
-watch(
-  () => userStore.selectedRideType,
-  async (newRideType, oldRideType) => {
-    if (isLoggedIn.value && map.value && userStore.role === 'Rider' && newRideType !== oldRideType) {
-      
-      const [currentLat, currentLon] = userStore.location;
+    clearAllMarkers();
+    userStore.rideState = 'idle';
+    clearRoute();
 
-      clearAllMarkers(); 
-
-      let success = false;
-      
-      if (newRideType === "horse") {
-        success = await fetchAndDisplayHorses(currentLat, currentLon, DEFAULT_RANGE);
-      } 
-      else if (newRideType === "carriage") {
-        success = await fetchAndDisplayCarriages(currentLat, currentLon, DEFAULT_RANGE);
-      }
-      
-      if (success) {
-        lastFetchCenter.value = { lat: currentLat, lon: currentLon };
-      }
-      
-      map.value.setView([currentLat, currentLon], map.value.getZoom());
+    let success = false;
+    if (newRideType === "horse") {
+      success = await fetchAndDisplayHorses(currentLat, currentLon, DEFAULT_RANGE);
+    } else if (newRideType === "carriage") {
+      success = await fetchAndDisplayCarriages(currentLat, currentLon, DEFAULT_RANGE);
     }
-  }
-);
-// -------------
 
-// --- Initialization ---
+    if (success) lastFetchCenter.value = { lat: currentLat, lon: currentLon };
+    map.value.setView([currentLat, currentLon], map.value.getZoom());
+  }
+});
+
 onMounted(async () => {
-  // Wait for DOM to be fully rendered
   await nextTick();
-
-  let initialLat = DEFAULT_LAT;
-  let initialLon = DEFAULT_LON;
-
-  if (userStore.loggedIn && userStore.location) {
-    [initialLat, initialLon] = userStore.location;
-  }
+  let initialLat = DEFAULT_LAT, initialLon = DEFAULT_LON;
+  if (userStore.loggedIn && userStore.location) [initialLat, initialLon] = userStore.location;
 
   try {
     const mapInstance = initializeMap(initialLat, initialLon, DEFAULT_ZOOM);
-
-    // Give Leaflet time to render
     await nextTick();
 
-    setupRoutingAndSearch(mapInstance, userMarker);
+    setupRoutingAndSearch(mapInstance, userMarker, onDestinationSelected);
+
     if (userStore.loggedIn && userStore.location) {
       updateUserMarker(mapInstance, initialLat, initialLon);
     }
@@ -135,24 +123,30 @@ onMounted(async () => {
     console.error('Map initialization failed:', error);
   }
 })
-// ----------------------
 </script>
 
 <template>
   <div id="map"></div>
 </template>
 
+<style>
+.driver-start-icon {
+  font-size: 20px;
+  text-align: center;
+  background: white;
+  border-radius: 50%;
+  line-height: 24px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+</style>
+
 <style scoped>
-/* Keep map layout local so it always fills the viewport and won't be accidentally
-   overridden by other global styles. This places the map behind overlays. */
 #map {
   position: fixed;
   inset: 0;
-  /* top:0; right:0; bottom:0; left:0 */
   width: 100%;
   height: 100%;
   z-index: 0;
   background-color: #eef2f7;
-  /* light background while tiles load */
 }
 </style>
