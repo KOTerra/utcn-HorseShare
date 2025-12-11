@@ -37,6 +37,7 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
     return response
 
+#=============DATA MODELS==================
 
 class UserData(BaseModel):
     uid: str
@@ -55,6 +56,21 @@ class DriverData(BaseModel):
 
 class HeartbeatInput(BaseModel):
     uid: str
+
+class RideRequest(BaseModel):
+    rider_uid: str 
+    rider_email: str
+    driver_uid: str 
+    driver_name: str 
+    pickup_location: List[float]
+    destination: List[float] 
+    price: float
+    
+class RideStatusUpdate(BaseModel):
+    status: str
+
+
+# =================ENDPOINTS======================
 
 @app.get("/api/hello")
 async def hello():
@@ -248,7 +264,63 @@ async def get_drivers_in_range(lat: float, lon: float, range: int) -> List[Dict[
     except Exception:
         raise HTTPException(status_code=500, detail="Internal server error fetching drivers.")
 
+# END POINTS FOR RIDES
+@app.post("/api/rides")
+async def create_ride_request(ride: RideRequest):
+    """
+    Rider creates a new ride request. 
+    Server validetes data, sets status to 'Pending' and writes to the DB
+    """
+    try:
+        rides_ref = db.reference("rides")
+        new_ride_ref = rides_ref.push() 
+        
+        # FIX APPLIED: Changed "driverId" to "driver_uid" to match client query
+        ride_data = {
+            "rideId": new_ride_ref.key,
+            "rider_uid": ride.rider_uid,     # Explicit naming 
+            "riderName": ride.rider_email, 
+            "driver_uid": ride.driver_uid,   # CRITICAL FIX: Matches client query
+            "driverName": ride.driver_name,
+            "pickupLocation": ride.pickup_location,
+            "destination": ride.destination,
+            "price": ride.price,             # Backend calculates price for now
+            "status": "pending",             # Always start as pending
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+        new_ride_ref.set(ride_data)
+        
+        return {
+            "message": "Ride requested successfully", 
+            "rideId": new_ride_ref.key
+        }
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create ride: {str(e)}")
+
+
+@app.put("/api/rides/{ride_id}/status")
+async def update_ride_status(ride_id: str, update: RideStatusUpdate):
+    """
+    Driver  updates the ride status (e.g., 'accepted', 'declined', 'completed').
+    """
+    try:
+        ride_ref = db.reference(f"rides/{ride_id}")
+        
+        if not ride_ref.get():
+             raise HTTPException(status_code=404, detail="Ride not found")
+
+        ride_ref.update({
+            "status": update.status
+        })
+        
+        return {"message": f"Ride status updated to {update.status}"}
+
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update ride: {str(e)}")
 
 @app.get("/")
 async def read_root():

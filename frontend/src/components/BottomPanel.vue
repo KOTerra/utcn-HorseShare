@@ -1,25 +1,45 @@
 <script setup>
 import logo from '../assets/logo.png'
 import { userStore } from '../stores/userStores.js'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue' 
+import { useRide } from '../composables/useRide.js'
 
 import WelcomeMessage from './bottom-panels/WelcomeMessage.vue'
 import RideSelection from './bottom-panels/RIdeSelection.vue'
 import WaitingForOrders from './bottom-panels/WaitingForOrders.vue'
 import FindingDrivers from './bottom-panels/FindingDrivers.vue'
 import IncomingRequest from './bottom-panels/IncomingRequest.vue'
+import DriverEnRoute from './bottom-panels/DriverEnRoute.vue'
+import RideInProgress from './bottom-panels/RideInProgress.vue'
+
+const { requestRide, resumeRideListener } = useRide()
+
+// If user refreshes page it should still resume this
+onMounted(() => {
+  resumeRideListener()
+})
 
 const currentPanel = computed(() => {
   if (!userStore.loggedIn) return 'welcome'
 
+  // --- RIDER VIEW LOGIC ---
   if (userStore.role === 'Rider') {
     if (userStore.rideState === 'finding_drivers') return 'finding_drivers'
+    // While waiting for acceptance, driver en route, or in progress -> Show "Waiting"
+    // TODO: Create specific panels for "Driver coming" or "Enjoy ride" 
+    if (['waiting_for_acceptance', 'driver_en_route', 'ride_in_progress'].includes(userStore.rideState)) {
+        return 'waiting_orders' 
+    }
     return 'ride_selector'
   }
 
+  // --- DRIVER VIEW LOGIC ---
   if (userStore.role === 'Carriage Driver') {
     if (userStore.rideState === 'request_received') return 'incoming_request'
-    return 'waiting_orders'
+    if (userStore.rideState === 'driver_en_route') return 'driver_en_route'
+    if (userStore.rideState === 'ride_in_progress') return 'ride_in_progress'
+    
+    return 'waiting_orders' 
   }
 
   return 'welcome'
@@ -34,11 +54,9 @@ const handleDriversFound = (drivers) => {
 }
 
 const handleRequestRide = (driver) => {
-  const driverName = driver.name || "Carriage Driver"
-  console.log("Request sent to driver:", driverName)
+  requestRide(driver)
 }
 
-//  Reset state on Back 
 const handleBack = () => {
   userStore.rideState = 'idle'
   userStore.nearbyDrivers = []
@@ -57,12 +75,18 @@ const handleBack = () => {
       <RideSelection v-else-if="currentPanel === 'ride_selector'" @ride-selected="handleRideSelection" />
 
       <FindingDrivers v-else-if="currentPanel === 'finding_drivers'"
-        :coords="{ lat: userStore.location[0], lng: userStore.location[1] }" @drivers-loaded="handleDriversFound"
-        @request-ride="handleRequestRide" @back="handleBack" />
+        :coords="{ lat: userStore.location[0], lng: userStore.location[1] }" 
+        @drivers-loaded="handleDriversFound"
+        @request-ride="handleRequestRide" 
+        @back="handleBack" />
 
       <WaitingForOrders v-else-if="currentPanel === 'waiting_orders'" />
 
       <IncomingRequest v-else-if="currentPanel === 'incoming_request'" />
+      
+      <DriverEnRoute v-else-if="currentPanel === 'driver_en_route'" />
+      
+      <RideInProgress v-else-if="currentPanel === 'ride_in_progress'" />
 
     </div>
 

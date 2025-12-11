@@ -1,98 +1,123 @@
 <script setup>
-import { defineEmits } from 'vue'
 import { userStore } from '../../stores/userStores.js'
+import { useRide } from '../../composables/useRide.js'
 
-const emit = defineEmits(['accept', 'decline'])
+const { acceptRide } = useRide()
 
-const acceptRide = () => {
-    userStore.rideState = 'in_ride'
+const handleAccept = () => {
+  acceptRide()
 }
 
-const declineRide = () => {
-    userStore.rideState = 'waiting_orders'
+const handleDecline = () => {
+    alert("Decline logic not implemented on server yet.")
 }
 </script>
 
 <template>
-    <div class="incoming-req-container">
-        <div class="icon-pulse">🛒</div>
-        <div class="req-info">
-            <span class="req-title">New Request!</span>
-            <span class="req-sub">Pickup: 2 mins away</span>
-        </div>
-        <div class="actions">
-            <button class="btn-decline" @click="declineRide">Decline</button>
-            <button class="btn-accept" @click="acceptRide">Accept</button>
-        </div>
+  <div class="request-panel">
+    <div class="request-header">
+      <h3>New Ride Request 🐴</h3>
+      <span class="price-badge">{{ userStore.incomingRequest?.price }} RON</span>
     </div>
+
+    <div class="passenger-info">
+      <div class="avatar-circle">
+        {{ userStore.incomingRequest?.riderName?.charAt(0).toUpperCase() || 'U' }}
+      </div>
+      <div class="details">
+        <p class="name">{{ userStore.incomingRequest?.riderName }}</p>
+        <p class="sub-text">Pickup: Current Location</p>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn decline" @click="handleDecline">Decline</button>
+      <button class="btn accept" @click="handleAccept">Accept Ride</button>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.incoming-req-container {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    color: white;
-    gap: 12px;
+.request-panel {
+  width: 100%;
+  color: white;
 }
 
-.icon-pulse {
-    font-size: 1.5rem;
-    animation: pulse 1.5s infinite;
+.request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
-.req-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+.request-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
 }
 
-.req-title {
-    font-weight: bold;
-    font-size: 1rem;
-    color: rgb(117, 202, 185);
+.price-badge {
+  background: #ffd700;
+  color: #000;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.9rem;
 }
 
-.req-sub {
-    font-size: 0.85rem;
-    opacity: 0.8;
+.passenger-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 16px;
 }
 
-.actions {
-    display: flex;
-    gap: 8px;
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  background: #75cab9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #222;
 }
 
-.btn-accept,
-.btn-decline {
-    border: none;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-weight: bold;
-    cursor: pointer;
+.details .name {
+  margin: 0;
+  font-weight: 600;
 }
 
-.btn-accept {
-    background: rgb(117, 202, 185);
-    color: #1a1a1a;
+.details .sub-text {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
 }
 
-.btn-decline {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
+.action-buttons {
+  display: flex;
+  gap: 10px;
 }
 
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
+.btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
 
-    50% {
-        transform: scale(1.2);
-    }
+.btn.accept {
+  background: #75cab9;
+  color: #1a1a1a;
+}
 
-    100% {
-        transform: scale(1);
-    }
+.btn.decline {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
 }
 </style>

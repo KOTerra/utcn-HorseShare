@@ -4,7 +4,7 @@ import { DEFAULT_RANGE } from '../composables/constants.js';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-function getDistance(lat1, lon1, lat2, lon2) {
+export function getDistance(lat1, lon1, lat2, lon2) {
   if(!lat1 || !lon1 || !lat2 || !lon2) return 99999;
   
   const R = 6371; // km

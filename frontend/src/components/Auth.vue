@@ -55,11 +55,12 @@ import { auth } from "../firebase"
 import { userStore, startWatchingLocation } from "../stores/userStores.js"
 import { useUserLocation } from '../composables/useUserLocation.js'
 import { startHeartbeat } from "../composables/heartbeat.js"
+import { useRide } from '../composables/useRide.js' 
 
 const loginError = ref(null)
 const role = ref("Rider")
 const API_URL = import.meta.env.VITE_API_URL
-
+const { listenForIncomingRequests } = useRide() 
 const loginWithGoogle = async () => {
   loginError.value = null // Clear previous errors
   const provider = new GoogleAuthProvider()
@@ -77,7 +78,7 @@ const loginWithGoogle = async () => {
       loginError.value = locationError.value
     }
 
-    // API call logic based on selected role
+    // API call logic based on selected role -> This represents the strategy design pattern
     if (role.value === "Rider") {
       await fetch(`${API_URL}/api/users`, {
         method: "PUT",
@@ -85,7 +86,7 @@ const loginWithGoogle = async () => {
         body: JSON.stringify({
           uid: user.uid,
           email: user.email,
-          location: location, // send the initial [lat, lon]
+          location: location, 
           loggedIn: true
         }),
       })
@@ -110,7 +111,8 @@ const loginWithGoogle = async () => {
     userStore.role = role.value
     userStore.loggedIn = true
     if(role.value == "Carriage Driver"){
-      userStore.selectedRideType = "none" 
+      userStore.selectedRideType = "none"
+      listenForIncomingRequests() 
     }
     else{
       userStore.selectedRideType = "horse";
@@ -128,7 +130,6 @@ const loginWithGoogle = async () => {
 </script>
 
 <style scoped>
-/* === General Auth Card Styles === */
 .auth-card {
   backdrop-filter: blur(8px);
   background: rgba(0, 0, 0, 0.3);
@@ -150,13 +151,11 @@ const loginWithGoogle = async () => {
   color: #ff6b6b;
 }
 
-/* === Google Login Button === */
 .google-login-btn {
   margin-bottom: 1.5rem;
 }
 
 
-/* === Role Selector (Styled like RideSelector buttons) === */
 .role-selector {
   display: flex;
   gap: 0.5rem;
@@ -173,7 +172,6 @@ const loginWithGoogle = async () => {
   color: rgba(255, 255, 255, 0.7);
   padding: 0.5rem 1rem;
   border-radius: 999px;
-  /* Pill shape */
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -181,9 +179,7 @@ const loginWithGoogle = async () => {
   display: flex;
   align-items: center;
   gap: 6px;
-  /* For emojis/icons */
   white-space: nowrap;
-  /* Prevent text wrapping */
 }
 
 .role-btn:hover {
@@ -193,9 +189,7 @@ const loginWithGoogle = async () => {
 
 .role-btn.active {
   background: rgb(117, 202, 185);
-  /* Active background color */
   color: #1a1a1a;
-  /* Active text color */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -206,7 +200,6 @@ const loginWithGoogle = async () => {
   }
 }
 
-/* === User Profile Specific Styles === */
 .login-info {
   margin-top: 1rem;
   color: white;
