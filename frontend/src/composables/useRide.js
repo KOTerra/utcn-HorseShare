@@ -1,5 +1,5 @@
 // src/composables/useRide.js
-import { toRaw } from 'vue'; 
+import { toRaw } from 'vue';
 import { userStore } from '../stores/userStores';
 import { getDatabase, ref as dbRef, onValue, query, orderByChild, equalTo, off } from 'firebase/database';
 import { getDistance } from './useApi.js';
@@ -9,7 +9,7 @@ const BASE_RATE = 5;
 const RATE_PER_KM = 3;
 
 // Initialize DB locally
-const db = getDatabase(); 
+const db = getDatabase();
 
 export function useRide() {
 
@@ -39,7 +39,7 @@ export function useRide() {
         }
 
         // Calculate Price
-        let price = 15; 
+        let price = 15;
         if (destLat && destLon) {
             const distMeters = getDistance(lat, lon, destLat, destLon);
             const distKm = distMeters / 1000;
@@ -51,12 +51,20 @@ export function useRide() {
         const payload = {
             rider_uid: userStore.uid,
             rider_email: userStore.email,
-            driver_uid: targetDriverId, 
+            driver_uid: targetDriverId,
             driver_name: plainDriver.name || "Carriage Driver",
             pickup_location: plainLocation,
             destination: (destLat && destLon) ? [destLat, destLon] : null,
             price: price
         };
+
+        userStore.activeRide = {
+            driver_name: plainDriver.name || "Carriage Driver",
+            price: price,
+            destination: (destLat && destLon) ? [destLat, destLon] : null,
+            status: 'pending'
+        };
+        userStore.rideState = 'waiting_for_acceptance';
 
         console.log("Sending Ride Request:", payload);
 
@@ -83,6 +91,8 @@ export function useRide() {
         } catch (error) {
             console.error("Final Error:", error);
             alert("Could not request ride. See console.");
+            userStore.rideState = 'finding_drivers';
+            userStore.activeRide = null;
         }
     };
 
@@ -96,6 +106,8 @@ export function useRide() {
         onValue(rideRef, (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
+
+            userStore.activeRide = data;
 
             if (data.status === 'accepted') {
                 userStore.rideState = 'driver_en_route';
@@ -122,9 +134,9 @@ export function useRide() {
 
         // Listen for requests addressed to my Email
         const q = query(
-            ridesRef, 
-            orderByChild('driver_uid'), 
-            equalTo(userStore.email) 
+            ridesRef,
+            orderByChild('driver_uid'),
+            equalTo(userStore.email)
         );
 
         onValue(q, (snapshot) => {
@@ -132,19 +144,19 @@ export function useRide() {
             if (!data) return;
 
             const rides = Object.values(data);
-            
+
             const pendingRide = rides.find(r => r.status === 'pending');
             const acceptedRide = rides.find(r => r.status === 'accepted');
             const pickedUpRide = rides.find(r => r.status === 'picked_up');
 
             if (pickedUpRide) {
-                 userStore.incomingRequest = pickedUpRide;
-                 userStore.currentRideId = pickedUpRide.rideId;
-                 userStore.rideState = 'ride_in_progress';
+                userStore.incomingRequest = pickedUpRide;
+                userStore.currentRideId = pickedUpRide.rideId;
+                userStore.rideState = 'ride_in_progress';
             } else if (acceptedRide) {
-                 userStore.incomingRequest = acceptedRide;
-                 userStore.currentRideId = acceptedRide.rideId;
-                 userStore.rideState = 'driver_en_route';
+                userStore.incomingRequest = acceptedRide;
+                userStore.currentRideId = acceptedRide.rideId;
+                userStore.rideState = 'driver_en_route';
             } else if (pendingRide) {
                 userStore.incomingRequest = pendingRide;
                 userStore.currentRideId = pendingRide.rideId;
@@ -189,12 +201,13 @@ export function useRide() {
         userStore.rideState = 'idle';
         userStore.currentRideId = null;
         userStore.incomingRequest = null;
+        userStore.activeRide = null;
         userStore.destination = null; // Clear destination on finish
     };
 
     const resumeRideListener = () => {
         if (userStore.role === 'Rider' && userStore.currentRideId) {
-            console.log("🔄 Resuming listener for ride:", userStore.currentRideId);
+            console.log("Resuming listener for ride:", userStore.currentRideId);
             listenForRideUpdates(userStore.currentRideId);
         }
     };
@@ -202,7 +215,7 @@ export function useRide() {
     return {
         requestRide,
         listenForIncomingRequests,
-        listenForRideUpdates, 
+        listenForRideUpdates,
         acceptRide,
         confirmPickup,
         completeRide,

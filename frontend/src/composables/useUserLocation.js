@@ -31,7 +31,7 @@ export function useUserLocation() {
     })
   }
 
-  // 3. Return the state and the function so a component can use them
+  //  Return the state and the function so a component can use them
   return {
     locationError,
     getUserLocationAsync

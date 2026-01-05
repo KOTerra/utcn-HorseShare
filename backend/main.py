@@ -275,12 +275,11 @@ async def create_ride_request(ride: RideRequest):
         rides_ref = db.reference("rides")
         new_ride_ref = rides_ref.push() 
         
-        # FIX APPLIED: Changed "driverId" to "driver_uid" to match client query
         ride_data = {
             "rideId": new_ride_ref.key,
             "rider_uid": ride.rider_uid,     # Explicit naming 
             "riderName": ride.rider_email, 
-            "driver_uid": ride.driver_uid,   # CRITICAL FIX: Matches client query
+            "driver_uid": ride.driver_uid,   
             "driverName": ride.driver_name,
             "pickupLocation": ride.pickup_location,
             "destination": ride.destination,
