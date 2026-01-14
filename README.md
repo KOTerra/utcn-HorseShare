@@ -18,3 +18,9 @@ Prerequisites: Ensure that you have Docker and Docker Compose installed.
 4 Access the frontend at http://localhost:5173. The backend will be running at http://localhost:8000.
 
 ![logo](img/logo.png)
+
+## Screenshots from a carriage ride
+![ss1](img/ss1.png)
+![ss2](img/ss2.png)
+![ss3](img/ss3.png)
+![ss4](img/ss4.png)
