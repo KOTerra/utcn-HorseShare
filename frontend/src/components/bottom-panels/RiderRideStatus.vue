@@ -62,7 +62,6 @@ const destinationDisplay = computed(() => {
                 <div class="progress-track">
                     <div class="progress-fill anim-arriving"></div>
                 </div>
-                <span class="status-msg">Your carriage is arriving</span>
             </div>
         </div>
 
