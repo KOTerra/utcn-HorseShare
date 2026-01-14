@@ -1,0 +1,166 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{url}
+
+\geometry{a4paper, margin=1in}
+
+\title{HorseShare Documentation}
+\author{Stolniceanu Iustin \and Stoica Mihai \\ \small Echipa: \c{S}arja de la Rob\={A}ne\c{S}ti}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\section{Scurtă descriere a proiectului}
+
+HorseShare este o aplicație de ride-sharing inspirată de platforme precum Uber, dar cu o abordare unică și ecologică: înlocuiește mașinile cu trăsuri și cai. Proiectul a fost dezvoltat în cadrul cursului de Inginerie Software la UTCN și servește ca un exemplu practic de aplicare a principiilor de inginerie software într-un proiect full-stack.
+
+Aplicația permite utilizatorilor (``Riders'') să comande o cursă de la locația lor curentă către o destinație aleasă, vizualizând șoferii (``Carriage Drivers'') disponibili pe o hartă interactivă. Șoferii, la rândul lor, pot vedea cererile de curse, le pot accepta sau respinge și își pot actualiza statusul în timp real.
+
+\section{Limbajele și tehnologiile folosite}
+
+Arhitectura proiectului este una de tip client-server, cu un frontend web și un backend RESTful.
+
+\subsection{Frontend}
+\begin{itemize}
+    \item \textbf{Vue.js (v3):} Un framework progresiv pentru construirea interfețelor utilizator.
+    \item \textbf{Vite:} Unelte rapide pentru dezvoltarea web modernă, folosit pentru build și server de dezvoltare.
+    \item \textbf{Tailwind CSS:} Un framework CSS de tip utility-first pentru stilizarea rapidă a componentelor.
+    \item \textbf{Leaflet.js:} O bibliotecă JavaScript open-source pentru hărți interactive. A fost utilizată pentru afișarea hărții, a locațiilor utilizatorilor și a rutelor.
+    \item \textbf{Firebase Authentication:} Folosit pentru autentificarea utilizatorilor prin email și parolă.
+\end{itemize}
+
+\subsection{Backend}
+\begin{itemize}
+    \item \textbf{Python 3:} Limbajul de programare principal pentru server.
+    \item \textbf{FastAPI:} Un framework web modern și rapid pentru construirea API-urilor cu Python, bazat pe type hints.
+    \item \textbf{Uvicorn:} Un server ASGI (Asynchronous Server Gateway Interface) pentru rularea aplicației FastAPI.
+    \item \textbf{Firebase Realtime Database \& Firestore:} Folosite ca baze de date NoSQL pentru a stoca în timp real informații despre starea curselor, locațiile șoferilor și datele utilizatorilor.
+    \item \textbf{Firebase Admin SDK:} Utilizat în backend pentru a interacționa în mod securizat cu serviciile Firebase.
+\end{itemize}
+
+\subsection{DevOps}
+\begin{itemize}
+    \item \textbf{Docker \& Docker Compose:} Tehnologii de containerizare folosite pentru a asigura un mediu de dezvoltare și producție consistent, izolat și ușor de instalat pentru frontend și backend.
+\end{itemize}
+
+\section{Cerințe și Diagrama Use-Case}
+
+\subsection{Cerințe funcționale}
+\begin{itemize}
+    \item CF1: Sistemul trebuie să permită crearea unui cont nou pentru utilizatori (Rider sau Driver).
+    \item CF2: Sistemul trebuie să permită autentificarea utilizatorilor existenți.
+    \item CF3: Utilizatorii trebuie să poată vizualiza o hartă interactivă.
+    \item CF4: Rider-ul trebuie să poată vedea șoferii disponibili în apropiere.
+    \item CF5: Rider-ul trebuie să poată selecta o destinație și să solicite o cursă.
+    \item CF6: Rider-ul trebuie să vadă o estimare a prețului înainte de a comanda.
+    \item CF7: Driver-ul trebuie să primească notificări pentru cererile de cursă noi.
+    \item CF8: Driver-ul trebuie să poată accepta sau respinge o cerere de cursă.
+    \item CF9: Rider-ul trebuie să vadă statusul cursei în timp real (acceptată, în drum, cursă în progres).
+    \item CF10: Driver-ul trebuie să poată actualiza statusul cursei (ex: a preluat pasagerul, a finalizat cursa).
+    \item CF11: Sistemul trebuie să stocheze informațiile despre utilizatori și curse.
+    \item CF12: Atât rider-ul cât și driver-ul trebuie să își actualizeze locația pe hartă în timp real.
+\end{itemize}
+
+\subsection{Cerințe non-funcționale}
+\begin{itemize}
+    \item \textbf{Performanță:} Timpul de răspuns pentru acțiunile critice (ex: acceptarea unei curse, actualizarea locației) trebuie să fie sub 3 secunde. Harta trebuie să rămână fluidă chiar și cu 50+ markere active.
+    \item \textbf{Fiabilitate:} Sistemul trebuie să gestioneze erorile de conexiune la rețea fără a pierde starea curentă a utilizatorului (ex: reconectare automată la serviciul de heartbeat).
+    \item \textbf{Usabilitate:} Interfața cu utilizatorul trebuie să fie intuitivă, permițând unui utilizator nou să comande o cursă în mai puțin de 1 minut de la autentificare.
+    \item \textbf{Securitate:} Autentificarea trebuie să fie securizată prin Firebase Authentication. Toate rutele de backend care necesită autentificare trebuie să fie protejate corespunzător.
+    \item \textbf{Mentenabilitate:} Codul trebuie să fie modular și bine documentat (prin design patterns) pentru a facilita modificări ulterioare.
+\end{itemize}
+
+\subsection{Diagrama Use-Case}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\textwidth]{../diagrams/UseCaseDiagram-HorseShare.png}
+    \caption{Diagrama Use-Case pentru aplicația HorseShare.}
+    \label{fig:usecase}
+\end{figure}
+
+\newpage
+\section{Diagrame}
+
+\subsection{Diagrame realizate de Stolniceanu Iustin}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../diagrams/iustin/StateDiagram_Heartbeat.png}
+    \caption{Diagrama de stări pentru Heartbeat (realizată de Stolniceanu Iustin).}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../diagrams/iustin/StateDiagram_Rides_DriversPerspective.png}
+    \caption{Diagrama de stări: Cursă - Perspectiva Șofer (realizată de Stolniceanu Iustin).}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../diagrams/iustin/StateDiagram_Rides_UserPersepective.drawio.png}
+    \caption{Diagrama de stări: Cursă - Perspectiva Utilizator (realizată de Stolniceanu Iustin).}
+\end{figure}
+
+\clearpage % Force new page for Mihai's diagrams
+\subsection{Diagrame realizate de Stoica Mihai}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../diagrams/mihai/AuthSeqDiagrampng.png}
+    \caption{Diagrama de secvență pentru autentificare (realizată de Stoica Mihai).}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../diagrams/mihai/AuthStateDiagram.png}
+    \caption{Diagrama de stări pentru autentificare (realizată de Stoica Mihai).}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../diagrams/mihai/LocationUpdateSeqDiagram.png}
+    \caption{Diagrama de secvență pentru actualizarea locației (realizată de Stoica Mihai).}
+\end{figure}
+
+\newpage
+\section{Design Patterns}
+
+\subsection{Heartbeat}
+\begin{itemize}
+    \item \textbf{Nume persoană:} Stolniceanu Iustin
+    \item \textbf{Problemă:} Într-o aplicație distribuită cum este HorseShare, backend-ul trebuie să știe în permanență care utilizatori (atât șoferi cât și clienți) sunt activi și online. Fără un mecanism activ de monitorizare, un utilizator care închide brusc aplicația sau pierde conexiunea la internet ar putea apărea în continuare ca fiind "online", ducând la alocarea incorectă a curselor către șoferi indisponibili sau la afișarea de informații învechite pe hartă.
+    \item \textbf{Soluție:} Pattern-ul Heartbeat rezolvă această problemă prin implementarea unui mecanism prin care clientul trimite la intervale regulate un semnal ("bătaie de inimă") către server pentru a-și semnala prezența. Serverul, la rândul său, monitorizează aceste semnale. Dacă un client nu mai trimite semnale pentru o perioadă de timp definită, serverul îl consideră deconectat și îi poate actualiza statusul.
+    \item \textbf{Implementare:} În proiect, funcționalitatea este implementată în fișierul \url{frontend/src/composables/heartbeat.js}. Funcția \texttt{startHeartbeat} inițiază un proces care, la un interval de timp regulat (definit de \url{HEARTBEAT_INTERVAL_MS}), trimite o cerere de tip POST către un endpoint specific de pe server (\url{/api/users/heartbeat} sau \url{/api/drivers/heartbeat}). Această cerere conține ID-ul unic al utilizatorului. În backend, serverul primește aceste cereri și actualizează un timestamp (ex: \texttt{lastActiveAt}) asociat utilizatorului respectiv în baza de date. Un proces separat pe backend poate apoi să verifice periodic și să marcheze ca offline utilizatorii al căror ultim heartbeat a depășit un anumit prag de timp.
+\end{itemize}
+
+\subsection{Observer}
+\begin{itemize}
+    \item \textbf{Nume persoană:} Stoica Mihai
+    \item \textbf{Problemă:} Aplicația necesită o comunicare și o sincronizare a stării în timp real între mai mulți utilizatori și server. De exemplu, un client (Rider) trebuie să vadă pe hartă cum locația șoferului se actualizează în timp ce acesta se îndreaptă spre el. De asemenea, clientul trebuie să fie notificat instantaneu când starea cursei se schimbă (ex: din "pending" în "accepted" sau din "picked_up" în "completed"). A interoga serverul la intervale scurte (polling) pentru a verifica dacă există modificări este ineficient și consumă multe resurse.
+    \item \textbf{Soluție:} Pattern-ul Observer oferă o soluție elegantă. Un obiect "subiect" (în acest caz, o intrare în Firebase Realtime Database, cum ar fi o cursă sau locația unui șofer) menține o listă de "observatori" (componentele din aplicația client). Când starea subiectului se modifică, acesta notifică automat toți observatorii, care își pot actualiza starea în consecință. Acest flux este ilustrat și în diagrama de secvență pentru actualizarea locației.
+    \item \textbf{Implementare:} În \url{frontend/src/composables/useRide.js}, funcția \texttt{listenForRideUpdates} este un exemplu clar al acestui pattern. Ea folosește funcția \texttt{onValue} din SDK-ul Firebase pentru a "observa" o anumită cursă în baza de date. Se creează o referință la resursa din baza de date, iar funcția \texttt{onValue} atașează un callback (observatorul) care este executat ori de câte ori datele de la acea referință se modifică.
+\end{itemize}
+
+\section{Scurt README}
+
+Acesta este un proiect de tip "Uber clone" care folosește cai și trăsuri, realizat pentru materia de Inginerie Software.
+
+\subsection{Cum se rulează proiectul}
+\begin{enumerate}
+    \item Asigurați-vă că aveți Docker și Docker Compose instalate.
+    \item Clonați repository-ul.
+    \item Creați un fișier \texttt{.env} în directorul rădăcină și adăugați variabilele de mediu necesare pentru cheile de API Firebase și alte configurări.
+    \item Rulați comanda \texttt{docker-compose up --build} din directorul rădăcină.
+    \item Accesați frontend-ul la \url{http://localhost:5173} și backend-ul va rula la \url{http://localhost:8000}.
+\end{enumerate}
+
+\end{document}

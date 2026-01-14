@@ -1,0 +1,17 @@
+\contentsline {section}{\numberline {1}Scurtă descriere a proiectului}{2}{section.1}%
+\contentsline {section}{\numberline {2}Limbajele și tehnologiile folosite}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Frontend}{2}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Backend}{2}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}DevOps}{2}{subsection.2.3}%
+\contentsline {section}{\numberline {3}Cerințe și Diagrama Use-Case}{2}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Cerințe funcționale}{2}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Cerințe non-funcționale}{3}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Diagrama Use-Case}{3}{subsection.3.3}%
+\contentsline {section}{\numberline {4}Diagrame}{4}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Diagrame realizate de Stolniceanu Iustin}{4}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Diagrame realizate de Stoica Mihai}{7}{subsection.4.2}%
+\contentsline {section}{\numberline {5}Design Patterns}{8}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Heartbeat}{8}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Observer}{9}{subsection.5.2}%
+\contentsline {section}{\numberline {6}Scurt README}{9}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Cum se rulează proiectul}{9}{subsection.6.1}%

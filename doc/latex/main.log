@@ -1,0 +1,540 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.1.11)  14 JAN 2026 21:35
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**./main.tex
+(main.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-12-24>
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
+Document Class: article 2025/01/22 v1.4n Standard LaTeX document class
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/base\size10.clo
+File: size10.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
+)
+\c@part=\count275
+\c@section=\count276
+\c@subsection=\count277
+\c@subsubsection=\count278
+\c@paragraph=\count279
+\c@subparagraph=\count280
+\c@figure=\count281
+\c@table=\count282
+\abovecaptionskip=\skip49
+\belowcaptionskip=\skip50
+\bibindent=\dimen148
+)
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty
+Package: inputenc 2024/02/08 v1.3d Input encoding file
+\inpenc@prehook=\toks17
+\inpenc@posthook=\toks18
+)
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+Package: graphicx 2024/12/31 v1.2e Enhanced LaTeX Graphics (DPC,SPQR)
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty
+Package: keyval 2022/05/29 v1.15 key=value parser (DPC)
+\KV@toks@=\toks19
+)
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+Package: graphics 2024/08/06 v1.4g Standard LaTeX Graphics (DPC,SPQR)
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty
+Package: trig 2023/12/02 v1.11 sin cos tan (DPC)
+)
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.c
+fg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 106.
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
+File: pdftex.def 2025/09/29 v1.2d Graphics/color driver for pdftex
+))
+\Gin@req@height=\dimen149
+\Gin@req@width=\dimen150
+)
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.sty
+Package: geometry 2020/01/02 v5.9 Page Geometry
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/generic/iftex\ifvtex.sty
+Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty
+Package: iftex 2024/12/12 v1.0g TeX engine tests
+))
+\Gm@cnth=\count283
+\Gm@cntv=\count284
+\c@Gm@tempcnt=\count285
+\Gm@bindingoffset=\dimen151
+\Gm@wd@mp=\dimen152
+\Gm@odd@mp=\dimen153
+\Gm@even@mp=\dimen154
+\Gm@layoutwidth=\dimen155
+\Gm@layoutheight=\dimen156
+\Gm@layouthoffset=\dimen157
+\Gm@layoutvoffset=\dimen158
+\Gm@dimlist=\toks20
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.cfg))
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
+Package: hyperref 2025-07-12 v7.01o Hypertext links for LaTeX
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.sty
+Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
+)
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdefine
+keys.sty
+Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
+)
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/generic/pdfescape\pdfescape.s
+ty
+Package: pdfescape 2019/12/09 v1.15 Implements pdfTeX's escape features (HO)
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty
+Package: ltxcmds 2023-12-04 v1.26 LaTeX kernel commands for general use (HO)
+)
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds
+.sty
+Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO
+)
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/generic/infwarerr\infwarerr.s
+ty
+Package: infwarerr 2019/12/03 v1.5 Providing info/warning/error messages (HO)
+)
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+))
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty
+Package: hycolor 2020-01-27 v1.10 Color options for hyperref/bookmark (HO)
+)
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
+Package: nameref 2025-06-21 v2.57 Cross-referencing by name of section
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.sty
+Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
+)
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/generic/gettitlestring\gettit
+lestring.sty
+Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty
+Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
+))
+\c@section@level=\count286
+)
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty
+Package: etoolbox 2025/10/02 v2.5m e-TeX tools for LaTeX (JAW)
+\etb@tempcnta=\count287
+)
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc.s
+ty
+Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO
+)
+)
+\@linkdim=\dimen159
+\Hy@linkcounter=\count288
+\Hy@pagecounter=\count289
+ (C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def
+File: pd1enc.def 2025-07-12 v7.01o Hyperref: PDFDocEncoding definition (HO)
+Now handling font encoding PD1 ...
+... no UTF-8 mapping file for font encoding PD1
+) (C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty
+Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
+)
+\Hy@SavedSpaceFactor=\count290
+ (C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def
+File: puenc.def 2025-07-12 v7.01o Hyperref: PDF Unicode definition (HO)
+Now handling font encoding PU ...
+... no UTF-8 mapping file for font encoding PU
+)
+Package hyperref Info: Hyper figures OFF on input line 4195.
+Package hyperref Info: Link nesting OFF on input line 4200.
+Package hyperref Info: Hyper index ON on input line 4203.
+Package hyperref Info: Plain pages OFF on input line 4210.
+Package hyperref Info: Backreferencing OFF on input line 4215.
+Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
+Package hyperref Info: Bookmarks ON on input line 4462.
+\c@Hy@tempcnt=\count291
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty
+\Urlmuskip=\muskip17
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+)
+LaTeX Info: Redefining \url on input line 4801.
+\XeTeXLinkMargin=\dimen160
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
+Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/generic/bigintcalc\bigintcalc
+.sty
+Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO
+)
+))
+\Fld@menulength=\count292
+\Field@Width=\dimen161
+\Fld@charsize=\dimen162
+Package hyperref Info: Hyper figures OFF on input line 6078.
+Package hyperref Info: Link nesting OFF on input line 6083.
+Package hyperref Info: Hyper index ON on input line 6086.
+Package hyperref Info: backreferencing OFF on input line 6093.
+Package hyperref Info: Link coloring OFF on input line 6098.
+Package hyperref Info: Link coloring with OCG OFF on input line 6103.
+Package hyperref Info: PDF/A mode OFF on input line 6108.
+\Hy@abspage=\count293
+\c@Item=\count294
+\c@Hfootnote=\count295
+)
+Package hyperref Info: Driver (autodetected): hpdftex.
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
+File: hpdftex.def 2025-07-12 v7.01o Hyperref driver for pdfTeX
+\Fld@listcount=\count296
+\c@bookmark@seq@number=\count297
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunfil
+echeck.sty
+Package: rerunfilecheck 2025-06-21 v1.11 Rerun checks for auxiliary files (HO)
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/generic/uniquecounter\uniquec
+ounter.sty
+Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
+)
+Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
+84.
+)
+\Hy@SectionHShift=\skip51
+)
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
+tex.def
+File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
+\l__color_backend_stack_int=\count298
+) (main.aux)
+\openout1 = `main.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 14.
+LaTeX Font Info:    ... okay on input line 14.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 14.
+LaTeX Font Info:    ... okay on input line 14.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 14.
+LaTeX Font Info:    ... okay on input line 14.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 14.
+LaTeX Font Info:    ... okay on input line 14.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 14.
+LaTeX Font Info:    ... okay on input line 14.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 14.
+LaTeX Font Info:    ... okay on input line 14.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 14.
+LaTeX Font Info:    ... okay on input line 14.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 14.
+LaTeX Font Info:    ... okay on input line 14.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 14.
+LaTeX Font Info:    ... okay on input line 14.
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
+ii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count299
+\scratchdimen=\dimen163
+\scratchbox=\box53
+\nofMPsegments=\count300
+\nofMParguments=\count301
+\everyMPshowfont=\toks21
+\MPscratchCnt=\count302
+\MPscratchDim=\dimen164
+\MPnumerator=\count303
+\makeMPintoPDFobject=\count304
+\everyMPtoPDFconversion=\toks22
+)
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-b
+ase.sty
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+85.
+
+(C:\Users\iusti\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.c
+fg
+File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
+))
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: a4paper
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: 
+* h-part:(L,W,R)=(72.26999pt, 452.9679pt, 72.26999pt)
+* v-part:(T,H,B)=(72.26999pt, 700.50687pt, 72.26999pt)
+* \paperwidth=597.50787pt
+* \paperheight=845.04684pt
+* \textwidth=452.9679pt
+* \textheight=700.50687pt
+* \oddsidemargin=0.0pt
+* \evensidemargin=0.0pt
+* \topmargin=-37.0pt
+* \headheight=12.0pt
+* \headsep=25.0pt
+* \topskip=10.0pt
+* \footskip=30.0pt
+* \marginparwidth=65.0pt
+* \marginparsep=11.0pt
+* \columnsep=10.0pt
+* \skip\footins=9.0pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidefalse
+* \@mparswitchfalse
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+Package hyperref Info: Link coloring OFF on input line 14.
+(main.out) (main.out)
+\@outlinefile=\write3
+\openout3 = `main.out'.
+
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <12> on input line 17.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 17.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 17.
+ (main.toc
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 2.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 2.
+)
+\tf@toc=\write4
+\openout4 = `main.toc'.
+
+ [1
+
+{C:/Users/iusti/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <14.4> on input line 28.
+ [2]
+<../diagrams/UseCaseDiagram-HorseShare.png, id=109, 1607.00375pt x 945.5325pt>
+File: ../diagrams/UseCaseDiagram-HorseShare.png Graphic file (type png)
+<use ../diagrams/UseCaseDiagram-HorseShare.png>
+Package pdftex.def Info: ../diagrams/UseCaseDiagram-HorseShare.png  used on inp
+ut line 85.
+(pdftex.def)             Requested size: 452.9679pt x 266.5219pt.
+ [3 <../diagrams/UseCaseDiagram-HorseShare.png>]
+<../diagrams/iustin/StateDiagram_Heartbeat.png, id=117, 721.69624pt x 488.82625
+pt>
+File: ../diagrams/iustin/StateDiagram_Heartbeat.png Graphic file (type png)
+<use ../diagrams/iustin/StateDiagram_Heartbeat.png>
+Package pdftex.def Info: ../diagrams/iustin/StateDiagram_Heartbeat.png  used on
+ input line 97.
+(pdftex.def)             Requested size: 362.37569pt x 245.4493pt.
+<../diagrams/iustin/StateDiagram_Rides_DriversPerspective.png, id=118, 397.485p
+t x 693.59125pt>
+File: ../diagrams/iustin/StateDiagram_Rides_DriversPerspective.png Graphic file
+ (type png)
+<use ../diagrams/iustin/StateDiagram_Rides_DriversPerspective.png>
+Package pdftex.def Info: ../diagrams/iustin/StateDiagram_Rides_DriversPerspecti
+ve.png  used on input line 103.
+(pdftex.def)             Requested size: 362.37569pt x 632.34378pt.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+<../diagrams/iustin/StateDiagram_Rides_UserPersepective.drawio.png, id=119, 653
+.44125pt x 693.59125pt>
+File: ../diagrams/iustin/StateDiagram_Rides_UserPersepective.drawio.png Graphic
+ file (type png)
+<use ../diagrams/iustin/StateDiagram_Rides_UserPersepective.drawio.png>
+Package pdftex.def Info: ../diagrams/iustin/StateDiagram_Rides_UserPersepective
+.drawio.png  used on input line 109.
+(pdftex.def)             Requested size: 362.37569pt x 384.64078pt.
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[4 <../diagrams/iustin/StateDiagram_Heartbeat.png>] [5 <../diagrams/iustin/Stat
+eDiagram_Rides_DriversPerspective.png>] [6 <../diagrams/iustin/StateDiagram_Rid
+es_UserPersepective.drawio.png>]
+<../diagrams/mihai/AuthSeqDiagrampng.png, id=138, 1177.39874pt x 1059.96pt>
+File: ../diagrams/mihai/AuthSeqDiagrampng.png Graphic file (type png)
+<use ../diagrams/mihai/AuthSeqDiagrampng.png>
+Package pdftex.def Info: ../diagrams/mihai/AuthSeqDiagrampng.png  used on input
+ line 118.
+(pdftex.def)             Requested size: 362.37569pt x 326.22285pt.
+<../diagrams/mihai/AuthStateDiagram.png, id=139, 2081.7775pt x 1983.41pt>
+File: ../diagrams/mihai/AuthStateDiagram.png Graphic file (type png)
+<use ../diagrams/mihai/AuthStateDiagram.png>
+Package pdftex.def Info: ../diagrams/mihai/AuthStateDiagram.png  used on input 
+line 124.
+(pdftex.def)             Requested size: 362.37569pt x 345.25583pt.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+<../diagrams/mihai/LocationUpdateSeqDiagram.png, id=140, 1518.67375pt x 876.273
+74pt>
+File: ../diagrams/mihai/LocationUpdateSeqDiagram.png Graphic file (type png)
+<use ../diagrams/mihai/LocationUpdateSeqDiagram.png>
+Package pdftex.def Info: ../diagrams/mihai/LocationUpdateSeqDiagram.png  used o
+n input line 130.
+(pdftex.def)             Requested size: 362.37569pt x 209.07986pt.
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[7
+
+ <../diagrams/mihai/AuthSeqDiagrampng.png>]
+Overfull \hbox (8.43526pt too wide) in paragraph at lines 140--141
+[]\OT1/cmr/bx/n/10 Problem^^Ua: []\OT1/cmr/m/n/10 Intr-o aplica[]ie dis-tribuit
+^^Ua cum este Horse-Share, backend-ul tre-buie s^^Ua []tie ^^^Pn permanen[]^^Ua
+
+ []
+
+[8 <../diagrams/mihai/AuthStateDiagram.png> <../diagrams/mihai/LocationUpdateSe
+qDiagram.png>]
+Overfull \hbox (20.26717pt too wide) in paragraph at lines 142--143
+[]\OT1/cmr/bx/n/10 Implementare: []\OT1/cmr/m/n/10 In proiect, func[]ionalitate
+a este im-ple-men-tat^^Ua ^^^Pn fi[]ierul []$\OT1/cmtt/m/n/10 frontend / src / 
+composables /
+ []
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.148 ..."pending" în "accepted" sau din "picked_
+                                                  up" în "completed"). A in...
+
+? 
+
+LaTeX Warning: Command \^ invalid in math mode on input line 148.
+
+! Please use \mathaccent for accents in math mode.
+\add@accent ... \let \ignorespaces \relax \accent 
+                                                  #1 #2\egroup \ifmmode \els...
+l.148 ...ng" în "accepted" sau din "picked_up" î
+                                                  n "completed"). A interoga...
+
+? 
+! Missing { inserted.
+<to be read again> 
+                   \begingroup 
+l.148 ...ng" în "accepted" sau din "picked_up" î
+                                                  n "completed"). A interoga...
+
+? 
+
+LaTeX Warning: Command \i invalid in math mode on input line 148.
+
+
+LaTeX Warning: Command \u invalid in math mode on input line 148.
+
+! Please use \mathaccent for accents in math mode.
+\add@accent ... \let \ignorespaces \relax \accent 
+                                                  #1 #2\egroup \ifmmode \els...
+l.148 ... scurte (polling) pentru a verifica dacă
+                                                   există modificări este ...
+
+? 
+
+LaTeX Warning: Command \u invalid in math mode on input line 148.
+
+! Please use \mathaccent for accents in math mode.
+\add@accent ... \let \ignorespaces \relax \accent 
+                                                  #1 #2\egroup \ifmmode \els...
+l.148 ...(polling) pentru a verifica dacă există
+                                                   modificări este ineficie...
+
+? 
+
+LaTeX Warning: Command \u invalid in math mode on input line 148.
+
+! Please use \mathaccent for accents in math mode.
+\add@accent ... \let \ignorespaces \relax \accent 
+                                                  #1 #2\egroup \ifmmode \els...
+l.148 ...pentru a verifica dacă există modifică
+                                                  ri este ineficient și con...
+
+? 
+
+LaTeX Warning: Command \textcommabelow invalid in math mode on input line 148.
+
+
+LaTeX Warning: Command \u invalid in math mode on input line 148.
+
+! Please use \mathaccent for accents in math mode.
+\add@accent ... \let \ignorespaces \relax \accent 
+                                                  #1 #2\egroup \ifmmode \els...
+l.148 ... modificări este ineficient și consumă
+                                                   multe resurse.
+? 
+
+! LaTeX Error: Command \item invalid in math mode.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.149     \item
+                \textbf{Soluție:} Pattern-ul Observer oferă o soluție ele...
+
+? 
+! Missing $ inserted.
+<inserted text> 
+                $
+l.149     \item \textbf
+                       {Soluție:} Pattern-ul Observer oferă o soluție ele...
+
+? 
+! Missing } inserted.
+<inserted text> 
+                }
+l.149     \item \textbf
+                       {Soluție:} Pattern-ul Observer oferă o soluție ele...
+
+? 
+
+Overfull \hbox (230.39586pt too wide) in paragraph at lines 148--149
+\OT1/cmr/m/n/10 "picked$[]\OML/cmm/m/it/10 p\OT1/cmr/m/n/10 "[]$ 
+ []
+
+[9] (main.aux)
+ ***********
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-12-24>
+ ***********
+Package rerunfilecheck Info: File `main.out' has not changed.
+(rerunfilecheck)             Checksum: C41EFACF4162094D072242EBA682A907;2605.
+ ) 
+Here is how much of TeX's memory you used:
+ 9051 strings out of 467871
+ 143381 string characters out of 5418376
+ 579947 words of memory out of 5000000
+ 37809 multiletter control sequences out of 15000+600000
+ 634324 words of font info for 62 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 75i,10n,79p,824b,521s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ <C:\Users\iusti\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm
+1000.pk><C:/Users/iusti/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfon
+ts/cm/cmbx10.pfb><C:/Users/iusti/AppData/Local/Programs/MiKTeX/fonts/type1/publ
+ic/amsfonts/cm/cmbx12.pfb><C:/Users/iusti/AppData/Local/Programs/MiKTeX/fonts/t
+ype1/public/amsfonts/cm/cmbx5.pfb><C:/Users/iusti/AppData/Local/Programs/MiKTeX
+/fonts/type1/public/amsfonts/cm/cmbx6.pfb><C:/Users/iusti/AppData/Local/Program
+s/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx7.pfb><C:/Users/iusti/AppData/Local
+/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/iusti/AppD
+ata/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/iu
+sti/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/
+Users/iusti/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.
+pfb><C:/Users/iusti/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/c
+m/cmr17.pfb><C:/Users/iusti/AppData/Local/Programs/MiKTeX/fonts/type1/public/am
+sfonts/cm/cmr5.pfb><C:/Users/iusti/AppData/Local/Programs/MiKTeX/fonts/type1/pu
+blic/amsfonts/cm/cmr9.pfb><C:/Users/iusti/AppData/Local/Programs/MiKTeX/fonts/t
+ype1/public/amsfonts/cm/cmtt10.pfb>
+Output written on main.pdf (9 pages, 444428 bytes).
+PDF statistics:
+ 246 PDF objects out of 1000 (max. 8388607)
+ 40 named destinations out of 1000 (max. 500000)
+ 172 words of extra memory for PDF output out of 10000 (max. 10000000)
+
